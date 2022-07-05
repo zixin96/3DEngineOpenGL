@@ -46,5 +46,13 @@
             "url": "https://github.com/corporateshark/bistro_materials.git",
             "sha1": "09cb3ebcc682cceae696b75125d2ec87746c1dc5"
         }
-    } 
+    },
+    {
+        "name": "glfw",
+        "source": {
+            "type": "git",
+            "url": "https://github.com/glfw/glfw.git",
+            "sha1": "da6713cd096a40a4512f468b34c189017e73f987"
+        }
+    }
 ]

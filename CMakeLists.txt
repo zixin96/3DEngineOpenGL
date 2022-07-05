@@ -25,11 +25,32 @@ if(WIN32)
 	add_definitions(-D_CRT_SECURE_NO_WARNINGS)
 endif()
 
+include_directories(.)
+include_directories(vendor/src)
+include_directories(vendor/src/glfw/include)
+include_directories(vendor/glad/include)
 # Enable this for vulkan engine. 
 # Comment this out for OpenGL engine
 # include_directories(vendor/src/vulkan/include)
 
-include_directories(.)
-include_directories(vendor/src)
+# add vendors
+add_subdirectory(vendor/src/glfw)
 
+# add samples
 add_subdirectory(Samples/HelloWorld)
+add_subdirectory(Samples/GLFW)
+
+set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "")
+set(GLFW_BUILD_TESTS OFF CACHE BOOL "")
+set(GLFW_BUILD_DOCS OFF CACHE BOOL "")
+set(GLFW_INSTALL OFF CACHE BOOL "")
+
+# package glad as static lib
+set(GLAD_SOURCES vendor/glad/src/gl.c)
+if(WIN32)
+	set(GLAD_SOURCES ${GLAD_SOURCES} vendor/glad/src/wgl.c)
+endif()
+add_library(glad ${GLAD_SOURCES})
+
+set_property(TARGET glfw          PROPERTY FOLDER "ThirdPartyLibraries")
+set_property(TARGET glad          PROPERTY FOLDER "ThirdPartyLibraries") 
