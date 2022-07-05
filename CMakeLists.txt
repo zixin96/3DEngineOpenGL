@@ -41,6 +41,7 @@ add_subdirectory(vendor/src/glfw)
 add_subdirectory(Samples/01HelloWorld)
 add_subdirectory(Samples/02HelloTriangle)
 add_subdirectory(Samples/03Cube)
+add_subdirectory(Samples/03CubeOptimized)
 
 set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "")
 set(GLFW_BUILD_TESTS OFF CACHE BOOL "")
