@@ -70,5 +70,13 @@
             "url": "https://github.com/nothings/stb.git",
             "sha1": "af1a5bc352164740c1cc1354942b1c6b72eacb8a"
         }
+    },
+    {
+        "name": "imgui",
+        "source": {
+            "type": "git",
+            "url": "https://github.com/ocornut/imgui.git",
+            "sha1": "82e10f1b617051dc8a046781e789fedd98b6dfdf"
+        }
     }
 ]

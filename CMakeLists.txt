@@ -31,6 +31,7 @@ include_directories(vendor/src/glfw/include)
 include_directories(vendor/glad/include)
 include_directories(vendor/src/glm)
 include_directories(vendor/src/stb)
+include_directories(vendor/src/imgui)
 # Enable this for vulkan engine. 
 # Comment this out for OpenGL engine
 # include_directories(vendor/src/vulkan/include)
@@ -44,6 +45,7 @@ add_subdirectory(Samples/02HelloTriangle)
 add_subdirectory(Samples/03Cube)
 add_subdirectory(Samples/03CubeOptimized)
 add_subdirectory(Samples/04TextureMapping)
+add_subdirectory(Samples/05ImGui)
 
 set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "")
 set(GLFW_BUILD_TESTS OFF CACHE BOOL "")

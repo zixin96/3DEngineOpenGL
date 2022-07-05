@@ -218,7 +218,7 @@ static const char* shaderCodeFragment = R"(
 
 	layout (location = 0) out vec4 outFragColor;
 
-	uniform sampler2D texture0;
+	layout (binding = 0) uniform sampler2D texture0;
 
 	void main()
 	{
