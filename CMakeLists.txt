@@ -29,6 +29,7 @@ include_directories(.)
 include_directories(vendor/src)
 include_directories(vendor/src/glfw/include)
 include_directories(vendor/glad/include)
+include_directories(vendor/src/glm)
 # Enable this for vulkan engine. 
 # Comment this out for OpenGL engine
 # include_directories(vendor/src/vulkan/include)
@@ -37,8 +38,9 @@ include_directories(vendor/glad/include)
 add_subdirectory(vendor/src/glfw)
 
 # add samples
-add_subdirectory(Samples/HelloWorld)
-add_subdirectory(Samples/GLFW)
+add_subdirectory(Samples/01HelloWorld)
+add_subdirectory(Samples/02HelloTriangle)
+add_subdirectory(Samples/03Cube)
 
 set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "")
 set(GLFW_BUILD_TESTS OFF CACHE BOOL "")

@@ -18,5 +18,20 @@ Copy `vendor/src/bistro/PatchedMaterials/XXX.mtl` into `vendor/src/bistro/Exteri
 
 - `${CMAKE_SOURCE_DIR}` vs `${CMAKE_CURRENT_SOURCE_DIR}`: `CMAKE_SOURCE_DIR` is where cmake was originally invoked, and `CMAKE_CURRENT_SOURCE_DIR` is where cmake is currently working.
 
+---
+
+```glsl
+layout (std140, binding = 0) uniform PerFrameData
+{
+	uniform mat4 mvp;
+	uniform int isWireFrame;
+}  // Notice here: missing semicolon! nothing shows up on screen
+```
+
+---
 
 
+
+## Features
+
+- Direct-State-Access (DSA)

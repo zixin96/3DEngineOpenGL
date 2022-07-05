@@ -54,5 +54,13 @@
             "url": "https://github.com/glfw/glfw.git",
             "sha1": "da6713cd096a40a4512f468b34c189017e73f987"
         }
+    },
+    {
+        "name": "glm",
+        "source": {
+            "type": "git",
+            "url": "https://github.com/g-truc/glm.git",
+            "sha1": "cc98465e3508535ba8c7f6208df934c156a018dc"
+        }
     }
 ]
