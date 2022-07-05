@@ -62,5 +62,13 @@
             "url": "https://github.com/g-truc/glm.git",
             "sha1": "cc98465e3508535ba8c7f6208df934c156a018dc"
         }
+    },
+    {
+        "name": "stb",
+        "source": {
+            "type": "git",
+            "url": "https://github.com/nothings/stb.git",
+            "sha1": "af1a5bc352164740c1cc1354942b1c6b72eacb8a"
+        }
     }
 ]
