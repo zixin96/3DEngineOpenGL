@@ -181,7 +181,7 @@ int main()
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 	glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, true);
 
-	GLFWwindow* window = glfwCreateWindow(1024, 768, "GLFW", nullptr, nullptr);
+	GLFWwindow* window = glfwCreateWindow(1000, 1000, "GLFW", nullptr, nullptr);
 	if (!window)
 	{
 		glfwTerminate();

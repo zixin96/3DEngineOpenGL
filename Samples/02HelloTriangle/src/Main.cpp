@@ -66,7 +66,7 @@ int main()
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-	GLFWwindow* window = glfwCreateWindow(1024, 768, "GLFW", nullptr, nullptr);
+	GLFWwindow* window = glfwCreateWindow(1000, 1000, "GLFW", nullptr, nullptr);
 	if (!window)
 	{
 		glfwTerminate();
@@ -114,7 +114,7 @@ int main()
 		glfwGetFramebufferSize(window, &width, &height);
 		glViewport(0, 0, width, height);
 
-		glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT);
 		glDrawArrays(GL_TRIANGLES, 0, 3);
 
