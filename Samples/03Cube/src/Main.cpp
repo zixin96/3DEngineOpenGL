@@ -3,6 +3,11 @@
 #include <glad/gl.h>
 #include <glm/glm.hpp>
 #include <glm/ext.hpp>
+
+#include "OpenGL/GLBuffer.h"
+#include "OpenGL/GLProgram.h"
+#include "OpenGL/GLShader.h"
+#include "Util/Debug.h"
 using glm::mat4;
 using glm::vec3;
 
@@ -10,79 +15,13 @@ using glm::vec3;
 using std::cout;
 using std::endl;
 
-void APIENTRY glDebugOutput(GLenum       source,
-                            GLenum       type,
-                            unsigned int id,
-                            GLenum       severity,
-                            GLsizei      length,
-                            const char*  message,
-                            const void*  userParam)
-{
-	// ignore non-significant error/warning codes
-	if (id == 131169 || id == 131185 || id == 131218 || id == 131204) return;
-
-	cout << "---------------" << endl;
-	cout << "Debug message (" << id << "): " << message << endl;
-
-	switch (source)
-	{
-		case GL_DEBUG_SOURCE_API: cout << "Source: API";
-			break;
-		case GL_DEBUG_SOURCE_WINDOW_SYSTEM: cout << "Source: Window System";
-			break;
-		case GL_DEBUG_SOURCE_SHADER_COMPILER: cout << "Source: Shader Compiler";
-			break;
-		case GL_DEBUG_SOURCE_THIRD_PARTY: cout << "Source: Third Party";
-			break;
-		case GL_DEBUG_SOURCE_APPLICATION: cout << "Source: Application";
-			break;
-		case GL_DEBUG_SOURCE_OTHER: cout << "Source: Other";
-			break;
-	}
-	cout << endl;
-
-	switch (type)
-	{
-		case GL_DEBUG_TYPE_ERROR: cout << "Type: Error";
-			break;
-		case GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR: cout << "Type: Deprecated Behaviour";
-			break;
-		case GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR: cout << "Type: Undefined Behaviour";
-			break;
-		case GL_DEBUG_TYPE_PORTABILITY: cout << "Type: Portability";
-			break;
-		case GL_DEBUG_TYPE_PERFORMANCE: cout << "Type: Performance";
-			break;
-		case GL_DEBUG_TYPE_MARKER: cout << "Type: Marker";
-			break;
-		case GL_DEBUG_TYPE_PUSH_GROUP: cout << "Type: Push Group";
-			break;
-		case GL_DEBUG_TYPE_POP_GROUP: cout << "Type: Pop Group";
-			break;
-		case GL_DEBUG_TYPE_OTHER: cout << "Type: Other";
-			break;
-	}
-	cout << endl;
-
-	switch (severity)
-	{
-		case GL_DEBUG_SEVERITY_HIGH: cout << "Severity: high";
-			break;
-		case GL_DEBUG_SEVERITY_MEDIUM: cout << "Severity: medium";
-			break;
-		case GL_DEBUG_SEVERITY_LOW: cout << "Severity: low";
-			break;
-		case GL_DEBUG_SEVERITY_NOTIFICATION: cout << "Severity: notification";
-			break;
-	}
-	cout << endl;
-	cout << endl;
-}
-
+// declare a C++ structure to hold our uniform buffer data
 struct PerFrameData
 {
+	// store the premultiplied model-view-projection matrix
 	mat4 mvp;
-	int  isWireFrame;
+	//  used to set the color of the wireframe rendering
+	int isWireframe;
 };
 
 static const char* shaderCodeVertex = R"(
@@ -198,16 +137,7 @@ int main()
 	glfwSwapInterval(1);
 
 	// OpenGL Debugging
-	int flags;
-	glGetIntegerv(GL_CONTEXT_FLAGS, &flags);
-	if (flags & GL_CONTEXT_FLAG_DEBUG_BIT)
-	{
-		// initialize debug output
-		glEnable(GL_DEBUG_OUTPUT);
-		glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
-		glDebugMessageCallback(glDebugOutput, nullptr);
-		glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, GL_TRUE);
-	}
+	initDebug();
 
 	// create an empty VAO
 	GLuint VAO;
@@ -216,32 +146,32 @@ int main()
 
 	// create per frame uniform buffer with no initial data
 	const GLsizeiptr perFrameDataBufferSize = sizeof(PerFrameData);
-	GLuint           perFrameDataBuffer;
-	glCreateBuffers(1, &perFrameDataBuffer);
-	glNamedBufferStorage(perFrameDataBuffer, perFrameDataBufferSize, nullptr, GL_DYNAMIC_STORAGE_BIT);
-	glBindBufferRange(GL_UNIFORM_BUFFER, 0, perFrameDataBuffer, 0, perFrameDataBufferSize);
+	GLBuffer         perFrameDataBuffer(perFrameDataBufferSize, nullptr, GL_DYNAMIC_STORAGE_BIT);
+	// Make the entire buffer accessible from GLSL shaders at binding point 0
+	glBindBufferRange(
+	                  // the buffer binding targets
+	                  GL_UNIFORM_BUFFER,
+	                  // the index associated with a uniform block
+	                  // This value should be used in the shader code to read data from the buffer
+	                  0,
+	                  // the buffer object
+	                  perFrameDataBuffer.getHandle(),
+	                  // the following two specify the starting offset and range of the buffer that is to be mapped to the uniform buffer
+	                  0,
+	                  perFrameDataBufferSize);
 
-	// compile the shaders and link them into a shader program
-	const GLuint shaderVertex = glCreateShader(GL_VERTEX_SHADER);
-	glShaderSource(shaderVertex, 1, &shaderCodeVertex, nullptr);
-	glCompileShader(shaderVertex);
 
-	const GLuint shaderFragment = glCreateShader(GL_FRAGMENT_SHADER);
-	glShaderSource(shaderFragment, 1, &shaderCodeFragment, nullptr);
-	glCompileShader(shaderFragment);
-
-	const GLuint shaderProgram = glCreateProgram();
-	glAttachShader(shaderProgram, shaderVertex);
-	glAttachShader(shaderProgram, shaderFragment);
-	glLinkProgram(shaderProgram);
-	glUseProgram(shaderProgram);
+	GLShader  shaderVertex(GL_VERTEX_SHADER, shaderCodeVertex, nullptr);
+	GLShader  shaderFragment(GL_FRAGMENT_SHADER, shaderCodeFragment, nullptr);
+	GLProgram shaderProgram(shaderVertex, shaderFragment);
+	shaderProgram.useProgram();
 
 	// depth test is required to render 3D objects
 	glEnable(GL_DEPTH_TEST);
-
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
 	// polygon offset is needed to render a wire frame image of the cube on top of the solid image without Z-fighting
+	// OpenGL Redbook: Page 171
 	glEnable(GL_POLYGON_OFFSET_LINE);
 	glPolygonOffset(-1.f, -1.f); // move the wireframe rendering slightly toward the camera
 
@@ -253,24 +183,44 @@ int main()
 		glViewport(0, 0, width, height);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		const mat4 m = glm::rotate(glm::translate(mat4(1.0f), vec3(0.0f, 0.0f, -3.5f)),
+		// To rotate the cube, the model matrix is calculated:
+		const mat4 m = glm::rotate(
+		                           glm::translate(mat4(1.0f), vec3(0.0f, 0.0f, -3.5f)),
+		                           //  the angle of rotation is based on the current system time returned by glfwGetTime()
 		                           (float)glfwGetTime(),
-		                           vec3(1.f, 1.f, .1f));
+		                           // To rotate the cube, the model matrix is calculated as a rotation around the diagonal (1, 1, 1) axis
+		                           vec3(1.0f, 1.0f, 1.0f));
 
 		const mat4 p = glm::perspective(45.f, ratio, 0.1f, 1000.f);
 
-		// render the solid cube with FILL mode
+		// To highlight the edges of our object, we first draw the object with polygon mode set to GL_FILL
+		// and then draw it again in a different color and with the polygon mode set to GL_LINE
+
 		PerFrameData perFrameData = {
 			.mvp = p * m,
-			.isWireFrame = false
+			.isWireframe = false
 		};
-		glNamedBufferSubData(perFrameDataBuffer, 0, perFrameDataBufferSize, &perFrameData);
+		// Replaces a subset of a buffer object’s data store with new data
+		glNamedBufferSubData(
+		                     // buffer to be updated
+		                     perFrameDataBuffer.getHandle(),
+		                     // The section of the buffer object specified in buffer starting at offset bytes is updated with
+		                     // the size bytes of data addressed by data:
+		                     // offset
+		                     0,
+		                     // size
+		                     perFrameDataBufferSize,
+		                     // data
+		                     &perFrameData);
+		// render the solid cube with the polygon mode set to GL_FILL
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+		// Note: gl_VertexID ranges from [0, 36), which is specified here
 		glDrawArrays(GL_TRIANGLES, 0, 36);
 
-		// render the solid cube with LINE mode
-		perFrameData.isWireFrame = true;
-		glNamedBufferSubData(perFrameDataBuffer, 0, perFrameDataBufferSize, &perFrameData);
+		// update the buffer for the second draw call
+		perFrameData.isWireframe = true;
+		glNamedBufferSubData(perFrameDataBuffer.getHandle(), 0, perFrameDataBufferSize, &perFrameData);
+		//  render the wireframe cube using the GL_LINE polygon mode
 		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 		glDrawArrays(GL_TRIANGLES, 0, 36);
 
@@ -279,10 +229,6 @@ int main()
 	}
 
 	// clean up the opengl objects
-	glDeleteBuffers(1, &perFrameDataBuffer);
-	glDeleteProgram(shaderProgram);
-	glDeleteShader(shaderVertex);
-	glDeleteShader(shaderFragment);
 	glDeleteVertexArrays(1, &VAO);
 
 	glfwDestroyWindow(window);

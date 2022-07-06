@@ -4,4 +4,4 @@ include(../../CommonMacros.txt)
 
 SETUP_APP(03CubeOptimized "Samples")
 
-target_link_libraries(03CubeOptimized glad glfw)
+target_link_libraries(03CubeOptimized glad glfw Core)

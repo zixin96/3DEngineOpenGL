@@ -3,7 +3,16 @@
 GLBuffer::GLBuffer(GLsizeiptr size, const void* data, GLbitfield flags)
 {
 	glCreateBuffers(1, &mHandle);
-	glNamedBufferStorage(mHandle, size, data, flags);
+	// Allocates size bytes of OpenGL server memory for storing data 
+	glNamedBufferStorage(
+	                     // the buffer affected
+	                     mHandle,
+	                     // number of bytes to allocate
+	                     size,
+	                     // initial data
+	                     data,
+	                     // tells the OpenGL implementation that how we will use the content of the data 
+	                     flags);
 }
 
 GLBuffer::~GLBuffer()

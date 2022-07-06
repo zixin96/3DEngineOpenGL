@@ -3,6 +3,10 @@
 #include <glad/gl.h>
 #include <glm/glm.hpp>
 #include <glm/ext.hpp>
+
+#include "OpenGL/GLBuffer.h"
+#include "OpenGL/GLProgram.h"
+#include "OpenGL/GLShader.h"
 using glm::mat4;
 using glm::vec3;
 using glm::vec4;
@@ -227,25 +231,13 @@ int main()
 	// create per frame uniform buffer with no initial data
 	GLsizeiptr perFrameDataSize = sizeof(PerFrameData);
 	GLuint     elementCount     = 2;
-	GLuint     perFrameDataBuffer;
-	glCreateBuffers(1, &perFrameDataBuffer);
 	//!? make the buffer wtice as large and store 2 different copies of PerFrameData
-	glNamedBufferStorage(perFrameDataBuffer, elementCount * perFrameDataSize, nullptr, GL_DYNAMIC_STORAGE_BIT);
+	GLBuffer perFrameDataBuffer(elementCount * perFrameDataSize, nullptr, GL_DYNAMIC_STORAGE_BIT);
 
-	// compile the shaders and link them into a shader program
-	const GLuint shaderVertex = glCreateShader(GL_VERTEX_SHADER);
-	glShaderSource(shaderVertex, 1, &shaderCodeVertex, nullptr);
-	glCompileShader(shaderVertex);
-
-	const GLuint shaderFragment = glCreateShader(GL_FRAGMENT_SHADER);
-	glShaderSource(shaderFragment, 1, &shaderCodeFragment, nullptr);
-	glCompileShader(shaderFragment);
-
-	const GLuint shaderProgram = glCreateProgram();
-	glAttachShader(shaderProgram, shaderVertex);
-	glAttachShader(shaderProgram, shaderFragment);
-	glLinkProgram(shaderProgram);
-	glUseProgram(shaderProgram);
+	GLShader  shaderVertex(GL_VERTEX_SHADER, shaderCodeVertex, nullptr);
+	GLShader  shaderFragment(GL_FRAGMENT_SHADER, shaderCodeFragment, nullptr);
+	GLProgram shaderProgram(shaderVertex, shaderFragment);
+	shaderProgram.useProgram();
 
 	// depth test is required to render 3D objects
 	glEnable(GL_DEPTH_TEST);
@@ -282,15 +274,15 @@ int main()
 			},
 		};
 		//!? update the entire buffer once
-		glNamedBufferSubData(perFrameDataBuffer, 0, elementCount * perFrameDataSize, perFrameData);
+		glNamedBufferSubData(perFrameDataBuffer.getHandle(), 0, elementCount * perFrameDataSize, perFrameData);
 
 		//!? feed the correct instance of PerFrameData into the shader
 
-		glBindBufferRange(GL_UNIFORM_BUFFER, 0, perFrameDataBuffer, 0 * perFrameDataSize, perFrameDataSize);
+		glBindBufferRange(GL_UNIFORM_BUFFER, 0, perFrameDataBuffer.getHandle(), 0 * perFrameDataSize, perFrameDataSize);
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 		glDrawArrays(GL_TRIANGLES, 0, 36);
 
-		glBindBufferRange(GL_UNIFORM_BUFFER, 0, perFrameDataBuffer, 1 * perFrameDataSize, perFrameDataSize);
+		glBindBufferRange(GL_UNIFORM_BUFFER, 0, perFrameDataBuffer.getHandle(), 1 * perFrameDataSize, perFrameDataSize);
 		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 		glDrawArrays(GL_TRIANGLES, 0, 36);
 
@@ -299,10 +291,6 @@ int main()
 	}
 
 	// clean up the opengl objects
-	glDeleteBuffers(1, &perFrameDataBuffer);
-	glDeleteProgram(shaderProgram);
-	glDeleteShader(shaderVertex);
-	glDeleteShader(shaderFragment);
 	glDeleteVertexArrays(1, &VAO);
 
 	glfwDestroyWindow(window);
