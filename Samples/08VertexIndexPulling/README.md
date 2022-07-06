@@ -1,0 +1,3 @@
+# 08VertexIndexPulling
+
+This demo implements programmable vertex and index pulling. We store vertices inside a shader storage buffer and indices inside another shader storage buffer. We read both data manually in the vertex shader. Compared with 07VertexPulling, this demo doesn't use index drawing (since we are pulling indices inside a storage buffer). Thus, instead of calling `glDrawElements`, we need to call `glDrawArrays` and specify the number of indices to draw. 

@@ -33,7 +33,8 @@ layout (std140, binding = 0) uniform PerFrameData
 
 ## Features
 
-- Direct-State-Access (DSA)
+- Direct-State-Access (DSA) programming model
+- Programmable vertex pulling (PVP) data storage approach
 
 
 

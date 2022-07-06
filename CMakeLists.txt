@@ -56,6 +56,7 @@ include_directories(vendor/src/stb)
 include_directories(vendor/src/imgui)
 include_directories(vendor/src/assimp/include)
 include_directories(${CMAKE_CURRENT_BINARY_DIR}/vendor/src/assimp/include)
+include_directories(Core)
 
 # package glad as static lib
 set(GLAD_SOURCES vendor/glad/src/gl.c)
@@ -74,6 +75,8 @@ set_property(TARGET UpdateAssimpLibsDebugSymbolsAndDLLs PROPERTY FOLDER "ThirdPa
 set_property(TARGET uninstall PROPERTY FOLDER "ThirdPartyLibraries")
 endif()
 
+add_subdirectory(Core)
+
 # add samples
 add_subdirectory(Samples/01HelloWorld)
 add_subdirectory(Samples/02HelloTriangle)
@@ -82,3 +85,5 @@ add_subdirectory(Samples/03CubeOptimized)
 add_subdirectory(Samples/04TextureMapping)
 add_subdirectory(Samples/05ImGui)
 add_subdirectory(Samples/06Duck)
+add_subdirectory(Samples/07VertexPulling)
+add_subdirectory(Samples/08VertexIndexPulling)
