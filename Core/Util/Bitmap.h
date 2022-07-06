@@ -4,8 +4,8 @@
 
 enum class eBitmapFormat
 {
-	UnsignedByte,
-	Float,
+	BitMapUnsignedByte,
+	BitMapFloat,
 };
 
 enum class eBitmapType
@@ -30,7 +30,7 @@ public:
 	int                  mHeight = 0;
 	int                  mDepth  = 1;
 	int                  mComp   = 3;
-	eBitmapFormat        mFmt    = eBitmapFormat::UnsignedByte;
+	eBitmapFormat        mFmt    = eBitmapFormat::BitMapUnsignedByte;
 	eBitmapType          mType   = eBitmapType::BitMap2D;
 	std::vector<uint8_t> mData;
 private:

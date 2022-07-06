@@ -134,7 +134,7 @@ GLTexture::GLTexture(GLenum type, const char* fileName, GLenum clamp)
 				// use stb's floating-point API to load a HDR range cube map image from a .hdr file
 				const float* img = stbi_loadf(fileName, &w, &h, &comp, 3);
 				assert(img);
-				Bitmap in(w, h, comp, eBitmapFormat::Float, img);
+				Bitmap in(w, h, comp, eBitmapFormat::BitMapFloat, img);
 				stbi_image_free((void*)img);
 
 				// is this cube map equirectangular? 

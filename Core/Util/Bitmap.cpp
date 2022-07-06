@@ -33,11 +33,11 @@ void Bitmap::initGetSetFuncs()
 	// choose the proper getter and setter based on the format of the bitmap 
 	switch (mFmt)
 	{
-		case eBitmapFormat::UnsignedByte:
+		case eBitmapFormat::BitMapUnsignedByte:
 			mSetPixelFunc = &Bitmap::setPixelUnsignedByte;
 			mGetPixelFunc = &Bitmap::getPixelUnsignedByte;
 			break;
-		case eBitmapFormat::Float:
+		case eBitmapFormat::BitMapFloat:
 			mSetPixelFunc = &Bitmap::setPixelFloat;
 			mGetPixelFunc = &Bitmap::getPixelFloat;
 			break;
@@ -88,7 +88,7 @@ glm::vec4 Bitmap::getPixelFloat(int x, int y) const
 
 int Bitmap::getBytesPerComponent(eBitmapFormat fmt)
 {
-	if (fmt == eBitmapFormat::UnsignedByte) return 1;
-	if (fmt == eBitmapFormat::Float) return 4;
+	if (fmt == eBitmapFormat::BitMapUnsignedByte) return 1;
+	if (fmt == eBitmapFormat::BitMapFloat) return 4;
 	return 0;
 }

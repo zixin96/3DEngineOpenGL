@@ -36,7 +36,7 @@ void main()
     mat3 normalMatrix = mat3(transpose(inverse(model)));
 
     vtx.uv = getTexCoord(positionIndex);
-    vtx.normal = getNormal(positionIndex) * normalMatrix;
+    vtx.normal = normalMatrix * getNormal(positionIndex);
     vtx.worldPos = (model * vec4(pos, 1.0)).xyz;
 }
 
