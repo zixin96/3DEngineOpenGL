@@ -99,33 +99,47 @@ int main()
 	gladLoadGL(glfwGetProcAddress);
 	glfwSwapInterval(1);
 
-	// create an empty VAO
+	// create a VAO
+	// For this example, we will use the vertex shader to generate
+	// all vertex data, so an empty VAO will be sufficient
 	GLuint VAO;
 	glCreateVertexArrays(1, &VAO);
 	glBindVertexArray(VAO);
 
-	GLShader shaderVertex(GL_VERTEX_SHADER, shaderCodeVertex, nullptr);
-	GLShader shaderFragment(GL_FRAGMENT_SHADER, shaderCodeFragment, nullptr);
+	GLShader  shaderVertex(GL_VERTEX_SHADER, shaderCodeVertex, nullptr);
+	GLShader  shaderFragment(GL_FRAGMENT_SHADER, shaderCodeFragment, nullptr);
 	GLProgram shaderProgram(shaderVertex, shaderFragment);
 	shaderProgram.useProgram();
 
+	// The main loop starts by checking whether the window should be closed
 	while (!glfwWindowShouldClose(window))
 	{
+		// Implement a resizable window by reading the current width and height from GLFW
+		// and updating the OpenGL viewport accordingly
 		int width, height;
 		glfwGetFramebufferSize(window, &width, &height);
 		glViewport(0, 0, width, height);
 
+		// Clear the screen
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT);
+
+		// render the triangle
+		// The glDrawArrays() function can be invoked with the empty VAO that we bound earlier
 		glDrawArrays(GL_TRIANGLES, 0, 3);
 
+		// The fragment shader output was rendered into the back buffer. Let's swap the front
+		// and back buffers to make the triangle visible
 		glfwSwapBuffers(window);
+
+		// poll the events
 		glfwPollEvents();
 	}
 
 	// clean up the opengl objects
 	glDeleteVertexArrays(1, &VAO);
 
+	// terminate GLFW
 	glfwDestroyWindow(window);
 	glfwTerminate();
 
