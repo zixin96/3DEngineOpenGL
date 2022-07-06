@@ -3,9 +3,18 @@
 #include <glad/gl.h>
 
 #include <iostream>
+
+#include "OpenGL/GLProgram.h"
+#include "OpenGL/GLShader.h"
 using std::cout;
 using std::endl;
 
+//  Let's draw a colored triangle
+// For the sake of brevity, all error checking is omitted 
+
+// We use the GLSL built-in gl_VertexID input variable to index into the pos[]
+// and col[] arrays to generate the vertex positions and colors programmatically
+// In this case, no user-defined inputs to the vertex shader are required.
 static const char* shaderCodeVertex = R"(
 	#version 460 core
 
@@ -62,6 +71,7 @@ int main()
 	}
 
 	// tell GLFW which OpenGL version to use
+	// we will use OpenGL 4.6 Core Profile
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
@@ -85,6 +95,7 @@ int main()
 
 	// prepare OpenGL context
 	glfwMakeContextCurrent(window);
+	// use the GLAD library to import all OpenGL entry points and extensions
 	gladLoadGL(glfwGetProcAddress);
 	glfwSwapInterval(1);
 
@@ -93,20 +104,10 @@ int main()
 	glCreateVertexArrays(1, &VAO);
 	glBindVertexArray(VAO);
 
-	// compile the shaders and link them into a shader program
-	const GLuint shaderVertex = glCreateShader(GL_VERTEX_SHADER);
-	glShaderSource(shaderVertex, 1, &shaderCodeVertex, nullptr);
-	glCompileShader(shaderVertex);
-
-	const GLuint shaderFragment = glCreateShader(GL_FRAGMENT_SHADER);
-	glShaderSource(shaderFragment, 1, &shaderCodeFragment, nullptr);
-	glCompileShader(shaderFragment);
-
-	const GLuint shaderProgram = glCreateProgram();
-	glAttachShader(shaderProgram, shaderVertex);
-	glAttachShader(shaderProgram, shaderFragment);
-	glLinkProgram(shaderProgram);
-	glUseProgram(shaderProgram);
+	GLShader shaderVertex(GL_VERTEX_SHADER, shaderCodeVertex, nullptr);
+	GLShader shaderFragment(GL_FRAGMENT_SHADER, shaderCodeFragment, nullptr);
+	GLProgram shaderProgram(shaderVertex, shaderFragment);
+	shaderProgram.useProgram();
 
 	while (!glfwWindowShouldClose(window))
 	{
@@ -123,9 +124,6 @@ int main()
 	}
 
 	// clean up the opengl objects
-	glDeleteProgram(shaderProgram);
-	glDeleteShader(shaderVertex);
-	glDeleteShader(shaderFragment);
 	glDeleteVertexArrays(1, &VAO);
 
 	glfwDestroyWindow(window);

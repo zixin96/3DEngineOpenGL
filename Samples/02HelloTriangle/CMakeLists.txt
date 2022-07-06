@@ -4,4 +4,4 @@ include(../../CommonMacros.txt)
 
 SETUP_APP(02HelloTriangle "Samples")
 
-target_link_libraries(02HelloTriangle glad glfw)
+target_link_libraries(02HelloTriangle glad glfw Core)
