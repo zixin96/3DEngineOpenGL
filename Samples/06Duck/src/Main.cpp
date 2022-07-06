@@ -11,6 +11,18 @@ using glm::vec4;
 using std::cout;
 using std::endl;
 
+#include <vector>
+
+#define STB_IMAGE_IMPLEMENTATION
+#include <stb/stb_image.h>
+#define STB_IMAGE_WRITE_IMPLEMENTATION
+#include <stb/stb_image_write.h>
+
+#include <assimp/scene.h>
+#include <assimp/postprocess.h>
+#include <assimp/cimport.h>
+#include <assimp/version.h>
+
 void APIENTRY glDebugOutput(GLenum       source,
                             GLenum       type,
                             unsigned int id,
@@ -90,69 +102,34 @@ struct PerFrameData
 };
 
 static const char* shaderCodeVertex = R"(
-#version 460 core
+	#version 460 core
 
-// this binding value should match what we bind the uniform buffer
-// notice that the uniform buffer matches the C++ structure
-layout (std140, binding = 0) uniform PerFrameData
-{
-	mat4 mvp;
-	int isWireFrame;
-	//!? match paddings with C++ struct
-	int p1[3];
-	vec4 p2[11];
-};
+	// this binding value should match what we bind the uniform buffer
+	// notice that the uniform buffer matches the C++ structure
+	layout (std140, binding = 0) uniform PerFrameData
+	{
+		mat4 mvp;
+		int isWireFrame;
+		//!? match paddings with C++ struct
+		int p1[3];
+		vec4 p2[11];
+	};
 
-// this location value should match the one in the fragment shader
-layout (location = 0) out vec3 color;
+	layout (location = 0) in vec3 pos;
+	layout (location = 0) out vec3 color;
 
-// procedural cube generation: 
-const vec3 posData[8] = vec3[8](
-  vec3(-1.0,-1.0, 1.0), vec3( 1.0,-1.0, 1.0),
-  vec3(1.0, 1.0, 1.0), vec3(-1.0, 1.0, 1.0),
-  vec3(-1.0,-1.0,-1.0), vec3(1.0,-1.0,-1.0),
-  vec3( 1.0, 1.0,-1.0), vec3(-1.0, 1.0,-1.0)
-);
-
-const vec3 colorData[8] = vec3[8](
-  vec3(1.0, 0.0, 0.0), vec3(0.0, 1.0, 0.0),
-  vec3(0.0, 0.0, 1.0), vec3(1.0, 1.0, 0.0),
-  vec3(1.0, 1.0, 0.0), vec3(0.0, 0.0, 1.0),
-  vec3(0.0, 1.0, 0.0), vec3(1.0, 0.0, 0.0)
-);
-
-const int indicesData[36] = int[36](
-	// front
-	0, 1, 2, 2, 3, 0,
-	// right
-	1, 5, 6, 6, 2, 1,
-	// back
-	7, 6, 5, 5, 4, 7,
-	// left
-	4, 0, 3, 3, 7, 4,
-	// bottom
-	4, 5, 1, 1, 0, 4,
-	// top
-	3, 2, 6, 6, 7, 3
-);
-
-void main()
-{
-	int idx = indicesData[gl_VertexID];
-	gl_Position = mvp * vec4(posData[idx], 1.0);
-	// if we are rendering a wire frame pass, set the vertex color to black
-	color = isWireFrame > 0 ? vec3(0.0) : colorData[idx];
-}
+	void main()
+	{
+		gl_Position = mvp * vec4(pos, 1.0);
+		color = isWireFrame > 0 ? vec3(0.0f) : pos.xyz;
+	}
 
 	)";
 
 static const char* shaderCodeFragment = R"(
 	#version 460 core
-
-	// this location value should match the one in the vertex shader
-	layout (location = 0) in vec3 color;
-
 	layout (location = 0) out vec4 outFragColor;
+	layout (location = 0) in vec3 color;
 
 	void main()
 	{
@@ -181,7 +158,7 @@ int main()
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 	glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, true);
 
-	GLFWwindow* window = glfwCreateWindow(1000, 1000, "Demo", nullptr, nullptr);
+	GLFWwindow* window = glfwCreateWindow(1000, 1000, "GLFW", nullptr, nullptr);
 	if (!window)
 	{
 		glfwTerminate();
@@ -195,6 +172,17 @@ int main()
 		if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
 		{
 			glfwSetWindowShouldClose(window, GLFW_TRUE);
+		}
+
+		// press F9 to save a screenshot 
+		if (key == GLFW_KEY_F9 && action == GLFW_PRESS)
+		{
+			int width, height;
+			glfwGetFramebufferSize(window, &width, &height);
+			uint8_t* ptr = (uint8_t*)malloc(width * height * 4);
+			glReadPixels(0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, ptr);
+			stbi_write_png("images/screenshot.png", width, height, 4, ptr, 0);
+			free(ptr);
 		}
 	});
 
@@ -215,21 +203,51 @@ int main()
 		glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, GL_TRUE);
 	}
 
-	// OpenGL uniform buffer offset alignment query
-	GLint alignment;
-	glGetIntegerv(GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT, &alignment);
+	const aiScene* scene = aiImportFile("data/rubber_duck/scene.gltf", aiProcess_Triangulate);
+	if (!scene || !scene->HasMeshes())
+	{
+		printf("Unable to load data/rubber_duck/scene.gltf\n");
+		exit(255);
+	}
 
-	// create an empty VAO
+	const aiMesh* mesh = scene->mMeshes[0];
+
+	std::vector<vec3> positions;
+	for (unsigned int i = 0; i != mesh->mNumFaces; i++)
+	{
+		const aiFace&      face   = mesh->mFaces[i];
+		const unsigned int idx[3] = {face.mIndices[0], face.mIndices[1], face.mIndices[2]};
+		for (int j = 0; j != 3; j++)
+		{
+			const aiVector3D v = mesh->mVertices[idx[j]];
+			positions.push_back(vec3(v.x, v.z, v.y));
+		}
+	}
+
+	aiReleaseImport(scene);
+
 	GLuint VAO;
+	GLuint meshData;
+
 	glCreateVertexArrays(1, &VAO);
+
+	glCreateBuffers(1, &meshData);
+	glNamedBufferStorage(meshData, sizeof(vec3) * positions.size(), positions.data(), 0);
+
+	glVertexArrayVertexBuffer(VAO, 0, meshData, 0, sizeof(vec3));
+	glEnableVertexArrayAttrib(VAO, 0);
+	glVertexArrayAttribFormat(VAO, 0, 3, GL_FLOAT, GL_FALSE, 0);
+	glVertexArrayAttribBinding(VAO, 0, 0);
+
 	glBindVertexArray(VAO);
+
+	const int numVertices = static_cast<int>(positions.size());
 
 	// create per frame uniform buffer with no initial data
 	GLsizeiptr perFrameDataSize = sizeof(PerFrameData);
 	GLuint     elementCount     = 2;
 	GLuint     perFrameDataBuffer;
 	glCreateBuffers(1, &perFrameDataBuffer);
-	//!? make the buffer wtice as large and store 2 different copies of PerFrameData
 	glNamedBufferStorage(perFrameDataBuffer, elementCount * perFrameDataSize, nullptr, GL_DYNAMIC_STORAGE_BIT);
 
 	// compile the shaders and link them into a shader program
@@ -279,7 +297,7 @@ int main()
 			{
 				.mvp = p * m,
 				.isWireFrame = true
-			},
+			}
 		};
 		//!? update the entire buffer once
 		glNamedBufferSubData(perFrameDataBuffer, 0, elementCount * perFrameDataSize, perFrameData);
@@ -288,11 +306,11 @@ int main()
 
 		glBindBufferRange(GL_UNIFORM_BUFFER, 0, perFrameDataBuffer, 0 * perFrameDataSize, perFrameDataSize);
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-		glDrawArrays(GL_TRIANGLES, 0, 36);
+		glDrawArrays(GL_TRIANGLES, 0, numVertices);
 
 		glBindBufferRange(GL_UNIFORM_BUFFER, 0, perFrameDataBuffer, 1 * perFrameDataSize, perFrameDataSize);
 		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-		glDrawArrays(GL_TRIANGLES, 0, 36);
+		glDrawArrays(GL_TRIANGLES, 0, numVertices);
 
 		glfwSwapBuffers(window);
 		glfwPollEvents();

@@ -52,7 +52,7 @@
         "source": {
             "type": "git",
             "url": "https://github.com/glfw/glfw.git",
-            "sha1": "da6713cd096a40a4512f468b34c189017e73f987"
+            "revision": "3.3.7"
         }
     },
     {
@@ -60,7 +60,7 @@
         "source": {
             "type": "git",
             "url": "https://github.com/g-truc/glm.git",
-            "sha1": "cc98465e3508535ba8c7f6208df934c156a018dc"
+            "revision": "0.9.9.8"
         }
     },
     {
@@ -76,7 +76,15 @@
         "source": {
             "type": "git",
             "url": "https://github.com/ocornut/imgui.git",
-            "sha1": "82e10f1b617051dc8a046781e789fedd98b6dfdf"
+            "revision": "v1.88"
+        }
+    },
+    {
+        "name": "assimp",
+        "source": {
+            "type": "git",
+            "url": "https://github.com/assimp/assimp.git",
+            "revision": "5.2.4"
         }
     }
 ]

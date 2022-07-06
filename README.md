@@ -1,6 +1,6 @@
 # 3D OpenGL Engine
 
-
+Before testing out the final model, remember to apply the patch. 
 
 ## Getting Started
 

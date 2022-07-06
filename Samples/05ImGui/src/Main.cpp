@@ -11,11 +11,6 @@ using glm::vec4;
 using std::cout;
 using std::endl;
 
-#define STB_IMAGE_IMPLEMENTATION
-#include <stb/stb_image.h>
-#define STB_IMAGE_WRITE_IMPLEMENTATION
-#include <stb/stb_image_write.h>
-
 #include <imgui/imgui.h>
 
 void APIENTRY glDebugOutput(GLenum       source,
@@ -161,17 +156,6 @@ int main()
 		if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
 		{
 			glfwSetWindowShouldClose(window, GLFW_TRUE);
-		}
-
-		// press F9 to save a screenshot 
-		if (key == GLFW_KEY_F9 && action == GLFW_PRESS)
-		{
-			int width, height;
-			glfwGetFramebufferSize(window, &width, &height);
-			uint8_t* ptr = (uint8_t*)malloc(width * height * 4);
-			glReadPixels(0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, ptr);
-			stbi_write_png("images/screenshot.png", width, height, 4, ptr, 0);
-			free(ptr);
 		}
 	});
 

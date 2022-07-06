@@ -21,6 +21,28 @@ if((NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/vendor/.bootstrap.json") OR ("${CMAK
 	endif()
 endif()
 
+set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "")
+set(GLFW_BUILD_TESTS OFF CACHE BOOL "")
+set(GLFW_BUILD_DOCS OFF CACHE BOOL "")
+set(GLFW_INSTALL OFF CACHE BOOL "")
+
+set(ASSIMP_NO_EXPORT ON CACHE BOOL "")
+set(ASSIMP_BUILD_DRACO OFF CACHE BOOL "")
+set(ASSIMP_BUILD_ASSIMP_TOOLS OFF CACHE BOOL "")
+set(ASSIMP_BUILD_TESTS OFF CACHE BOOL "")
+set(ASSIMP_INSTALL_PDB OFF CACHE BOOL "")
+set(ASSIMP_BUILD_ALL_IMPORTERS_BY_DEFAULT OFF CACHE BOOL "")
+set(ASSIMP_BUILD_OBJ_IMPORTER ON CACHE BOOL "")
+set(ASSIMP_BUILD_GLTF_IMPORTER ON CACHE BOOL "")
+
+# Enable this for vulkan engine. 
+# Comment this out for OpenGL engine
+# include_directories(vendor/src/vulkan/include)
+
+# add vendors
+add_subdirectory(vendor/src/glfw)
+add_subdirectory(vendor/src/assimp)
+
 if(WIN32)
 	add_definitions(-D_CRT_SECURE_NO_WARNINGS)
 endif()
@@ -32,25 +54,8 @@ include_directories(vendor/glad/include)
 include_directories(vendor/src/glm)
 include_directories(vendor/src/stb)
 include_directories(vendor/src/imgui)
-# Enable this for vulkan engine. 
-# Comment this out for OpenGL engine
-# include_directories(vendor/src/vulkan/include)
-
-# add vendors
-add_subdirectory(vendor/src/glfw)
-
-# add samples
-add_subdirectory(Samples/01HelloWorld)
-add_subdirectory(Samples/02HelloTriangle)
-add_subdirectory(Samples/03Cube)
-add_subdirectory(Samples/03CubeOptimized)
-add_subdirectory(Samples/04TextureMapping)
-add_subdirectory(Samples/05ImGui)
-
-set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "")
-set(GLFW_BUILD_TESTS OFF CACHE BOOL "")
-set(GLFW_BUILD_DOCS OFF CACHE BOOL "")
-set(GLFW_INSTALL OFF CACHE BOOL "")
+include_directories(vendor/src/assimp/include)
+include_directories(${CMAKE_CURRENT_BINARY_DIR}/vendor/src/assimp/include)
 
 # package glad as static lib
 set(GLAD_SOURCES vendor/glad/src/gl.c)
@@ -60,4 +65,18 @@ endif()
 add_library(glad ${GLAD_SOURCES})
 
 set_property(TARGET glfw          PROPERTY FOLDER "ThirdPartyLibraries")
-set_property(TARGET glad          PROPERTY FOLDER "ThirdPartyLibraries") 
+set_property(TARGET glad          PROPERTY FOLDER "ThirdPartyLibraries")
+set_property(TARGET assimp        PROPERTY FOLDER "ThirdPartyLibraries")
+if(WIN32)
+set_property(TARGET zlibstatic    PROPERTY FOLDER "ThirdPartyLibraries")
+set_property(TARGET UpdateAssimpLibsDebugSymbolsAndDLLs PROPERTY FOLDER "ThirdPartyLibraries")
+endif()
+
+# add samples
+add_subdirectory(Samples/01HelloWorld)
+add_subdirectory(Samples/02HelloTriangle)
+add_subdirectory(Samples/03Cube)
+add_subdirectory(Samples/03CubeOptimized)
+add_subdirectory(Samples/04TextureMapping)
+add_subdirectory(Samples/05ImGui)
+add_subdirectory(Samples/06Duck)
