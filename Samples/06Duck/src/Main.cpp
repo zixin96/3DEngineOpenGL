@@ -138,6 +138,33 @@ static const char* shaderCodeFragment = R"(
 
 	)";
 
+std::vector<vec3> LoadModel()
+{
+	const aiScene* scene = aiImportFile("data/rubber_duck/scene.gltf", aiProcess_Triangulate);
+	if (!scene || !scene->HasMeshes())
+	{
+		printf("Unable to load data/rubber_duck/scene.gltf\n");
+		exit(255);
+	}
+
+	const aiMesh* mesh = scene->mMeshes[0];
+
+	std::vector<vec3> positions;
+	for (unsigned int i = 0; i != mesh->mNumFaces; i++)
+	{
+		const aiFace&      face   = mesh->mFaces[i];
+		const unsigned int idx[3] = {face.mIndices[0], face.mIndices[1], face.mIndices[2]};
+		for (int j = 0; j != 3; j++)
+		{
+			const aiVector3D v = mesh->mVertices[idx[j]];
+			positions.push_back(vec3(v.x, v.z, v.y));
+		}
+	}
+
+	aiReleaseImport(scene);
+	return positions;
+}
+
 int main()
 {
 	// set the GLFW error callback via a simple lambda to catch potential errors
@@ -203,45 +230,20 @@ int main()
 		glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, GL_TRUE);
 	}
 
-	const aiScene* scene = aiImportFile("data/rubber_duck/scene.gltf", aiProcess_Triangulate);
-	if (!scene || !scene->HasMeshes())
-	{
-		printf("Unable to load data/rubber_duck/scene.gltf\n");
-		exit(255);
-	}
-
-	const aiMesh* mesh = scene->mMeshes[0];
-
-	std::vector<vec3> positions;
-	for (unsigned int i = 0; i != mesh->mNumFaces; i++)
-	{
-		const aiFace&      face   = mesh->mFaces[i];
-		const unsigned int idx[3] = {face.mIndices[0], face.mIndices[1], face.mIndices[2]};
-		for (int j = 0; j != 3; j++)
-		{
-			const aiVector3D v = mesh->mVertices[idx[j]];
-			positions.push_back(vec3(v.x, v.z, v.y));
-		}
-	}
-
-	aiReleaseImport(scene);
+	std::vector<vec3> positions   = LoadModel();
+	const int         numVertices = static_cast<int>(positions.size());
 
 	GLuint VAO;
 	GLuint meshData;
-
 	glCreateVertexArrays(1, &VAO);
-
 	glCreateBuffers(1, &meshData);
 	glNamedBufferStorage(meshData, sizeof(vec3) * positions.size(), positions.data(), 0);
-
 	glVertexArrayVertexBuffer(VAO, 0, meshData, 0, sizeof(vec3));
 	glEnableVertexArrayAttrib(VAO, 0);
 	glVertexArrayAttribFormat(VAO, 0, 3, GL_FLOAT, GL_FALSE, 0);
 	glVertexArrayAttribBinding(VAO, 0, 0);
 
 	glBindVertexArray(VAO);
-
-	const int numVertices = static_cast<int>(positions.size());
 
 	// create per frame uniform buffer with no initial data
 	GLsizeiptr perFrameDataSize = sizeof(PerFrameData);
@@ -267,12 +269,9 @@ int main()
 
 	// depth test is required to render 3D objects
 	glEnable(GL_DEPTH_TEST);
-
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-
-	// polygon offset is needed to render a wire frame image of the cube on top of the solid image without Z-fighting
-	glEnable(GL_POLYGON_OFFSET_LINE);
-	glPolygonOffset(-1.f, -1.f); // move the wireframe rendering slightly toward the camera
+	glEnable(GL_POLYGON_OFFSET_LINE); // polygon offset is needed to render a wire frame image of the cube on top of the solid image without Z-fighting
+	glPolygonOffset(-1.f, -1.f);      // move the wireframe rendering slightly toward the camera
 
 	while (!glfwWindowShouldClose(window))
 	{
@@ -285,7 +284,6 @@ int main()
 		const mat4 m = glm::rotate(glm::translate(mat4(1.0f), vec3(0.0f, 0.0f, -3.5f)),
 		                           (float)glfwGetTime(),
 		                           vec3(1.f, 1.f, .1f));
-
 		const mat4 p = glm::perspective(45.f, ratio, 0.1f, 1000.f);
 
 		// render the solid cube with FILL mode

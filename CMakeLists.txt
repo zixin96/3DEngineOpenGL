@@ -65,11 +65,13 @@ endif()
 add_library(glad ${GLAD_SOURCES})
 
 set_property(TARGET glfw          PROPERTY FOLDER "ThirdPartyLibraries")
+set_property(TARGET update_mappings          PROPERTY FOLDER "ThirdPartyLibraries")
 set_property(TARGET glad          PROPERTY FOLDER "ThirdPartyLibraries")
 set_property(TARGET assimp        PROPERTY FOLDER "ThirdPartyLibraries")
 if(WIN32)
 set_property(TARGET zlibstatic    PROPERTY FOLDER "ThirdPartyLibraries")
 set_property(TARGET UpdateAssimpLibsDebugSymbolsAndDLLs PROPERTY FOLDER "ThirdPartyLibraries")
+set_property(TARGET uninstall PROPERTY FOLDER "ThirdPartyLibraries")
 endif()
 
 # add samples
