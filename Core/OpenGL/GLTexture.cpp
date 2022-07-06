@@ -1,12 +1,13 @@
 #include "GLTexture.h"
-//#include "shared/Bitmap.h"
-//#include "shared/UtilsCubemap.h"
+#include "Util/Bitmap.h"
+#include "Util/UtilsCubemap.h"
 
 #include <glad/gl.h>
 #include <cassert>
 #include <cstdio>
 #include <string>
 
+#include <stb_image_write.h>
 #include <stb/stb_image.h>
 //#include <gli/gli.hpp>
 //#include <gli/texture2d.hpp>
@@ -95,8 +96,8 @@ GLTexture::GLTexture(GLenum type, const char* fileName, GLenum clamp)
 					// w          = extent.x;
 					// h          = extent.y;
 					// numMipmaps = getNumMipMapLevels2D(w, h);
-					// glTextureStorage2D(handle_, numMipmaps, format.Internal, w, h);
-					// glTextureSubImage2D(handle_, 0, 0, 0, w, h, format.External, format.Type, gliTex.data(0, 0, 0));
+					// glTextureStorage2D(mHandle, numMipmaps, format.Internal, w, h);
+					// glTextureSubImage2D(mHandle, 0, 0, 0, w, h, format.External, format.Type, gliTex.data(0, 0, 0));
 				}
 				else
 				{
@@ -127,37 +128,51 @@ GLTexture::GLTexture(GLenum type, const char* fileName, GLenum clamp)
 			}
 		case GL_TEXTURE_CUBE_MAP:
 			{
-				assert(false);
-				// int          w, h, comp;
-				// const float* img = stbi_loadf(fileName, &w, &h, &comp, 3);
-				// assert(img);
-				// Bitmap     in(w, h, comp, eBitmapFormat_Float, img);
-				// const bool isEquirectangular = w == 2 * h;
-				// Bitmap     out               = isEquirectangular ? convertEquirectangularMapToVerticalCross(in) : in;
-				// stbi_image_free((void*)img);
-				// Bitmap cubemap = convertVerticalCrossToCubeMapFaces(out);
-				//
-				// const int numMipmaps = getNumMipMapLevels2D(cubemap.w_, cubemap.h_);
-				//
-				// glTextureParameteri(handle_, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-				// glTextureParameteri(handle_, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-				// glTextureParameteri(handle_, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-				// glTextureParameteri(handle_, GL_TEXTURE_BASE_LEVEL, 0);
-				// glTextureParameteri(handle_, GL_TEXTURE_MAX_LEVEL, numMipmaps - 1);
-				// glTextureParameteri(handle_, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-				// glTextureParameteri(handle_, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-				// glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
-				// glTextureStorage2D(handle_, numMipmaps, GL_RGB32F, cubemap.w_, cubemap.h_);
-				// const uint8_t* data = cubemap.data_.data();
-				//
-				// for (unsigned i = 0; i != 6; ++i)
-				// {
-				// 	glTextureSubImage3D(handle_, 0, 0, 0, i, cubemap.w_, cubemap.h_, 1, GL_RGB, GL_FLOAT, data);
-				// 	data += cubemap.w_ * cubemap.h_ * cubemap.comp_ * Bitmap::getBytesPerComponent(cubemap.fmt_);
-				// }
-				//
-				// glGenerateTextureMipmap(handle_);
-				// break;
+				// assume that the cube map is either in equirectangular format or vertical cross format
+
+				int w, h, comp;
+				// use stb's floating-point API to load a HDR range cube map image from a .hdr file
+				const float* img = stbi_loadf(fileName, &w, &h, &comp, 3);
+				assert(img);
+				Bitmap in(w, h, comp, eBitmapFormat::Float, img);
+				stbi_image_free((void*)img);
+
+				// is this cube map equirectangular? 
+				const bool isEquirectangular = w == 2 * h;
+				// if so, convert it to vertical cross format. o.w., it is a vertical cross format. 
+				Bitmap out = isEquirectangular ? convertEquirectangularMapToVerticalCross(in) : in;
+
+				#ifndef NDEBUG
+				stbi_write_hdr("images/cubemap_verticalcross.hdr",
+				               out.mWidth,
+				               out.mHeight,
+				               out.mComp,
+				               (const float*)out.mData.data());
+				#endif
+
+				Bitmap cubemap = convertVerticalCrossToCubeMapFaces(out);
+
+				const int numMipmaps = getNumMipMapLevels2D(cubemap.mWidth, cubemap.mHeight);
+
+				glTextureParameteri(mHandle, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+				glTextureParameteri(mHandle, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+				glTextureParameteri(mHandle, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+				glTextureParameteri(mHandle, GL_TEXTURE_BASE_LEVEL, 0);
+				glTextureParameteri(mHandle, GL_TEXTURE_MAX_LEVEL, numMipmaps - 1);
+				glTextureParameteri(mHandle, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+				glTextureParameteri(mHandle, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+				glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
+				glTextureStorage2D(mHandle, numMipmaps, GL_RGB32F, cubemap.mWidth, cubemap.mHeight);
+				const uint8_t* data = cubemap.mData.data();
+
+				for (unsigned i = 0; i != 6; ++i)
+				{
+					glTextureSubImage3D(mHandle, 0, 0, 0, i, cubemap.mWidth, cubemap.mHeight, 1, GL_RGB, GL_FLOAT, data);
+					data += cubemap.mWidth * cubemap.mHeight * cubemap.mComp * Bitmap::getBytesPerComponent(cubemap.mFmt);
+				}
+
+				glGenerateTextureMipmap(mHandle);
+				break;
 			}
 		default:
 			assert(false);
