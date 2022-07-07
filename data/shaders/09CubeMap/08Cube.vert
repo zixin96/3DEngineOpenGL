@@ -1,6 +1,6 @@
 #version 460 core
 
-#include <data/shaders/09CubeMap/GLBufferDecl.h>
+#include <data/shaders/09CubeMap/GLBufferDecl.glsl>
 
 layout (location=0) out vec3 dir;
 

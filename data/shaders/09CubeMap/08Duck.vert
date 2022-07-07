@@ -1,6 +1,6 @@
 #version 460 core
 
-#include <data/shaders/09CubeMap/GLBufferDecl.h>
+#include <data/shaders/09CubeMap/GLBufferDecl.glsl>
 
 struct PerVertex
 {
