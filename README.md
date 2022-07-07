@@ -36,6 +36,7 @@ layout (std140, binding = 0) uniform PerFrameData
 - Direct-State-Access (DSA) programming model
 - Programmable vertex pulling (PVP) data storage approach
 - HDR Cube map: 6 faces or equirectangular format or vertical/horizontal cross
+- Offline mesh conversion tool
 
 
 

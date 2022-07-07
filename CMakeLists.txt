@@ -35,6 +35,10 @@ set(ASSIMP_BUILD_ALL_IMPORTERS_BY_DEFAULT OFF CACHE BOOL "")
 set(ASSIMP_BUILD_OBJ_IMPORTER ON CACHE BOOL "")
 set(ASSIMP_BUILD_GLTF_IMPORTER ON CACHE BOOL "")
 
+set(MESHOPT_BUILD_DEMO OFF CACHE BOOL "")
+set(MESHOPT_BUILD_TOOLS OFF CACHE BOOL "")
+set(MESHOPT_BUILD_SHARED_LIBS OFF CACHE BOOL "")
+
 # Enable this for vulkan engine. 
 # Comment this out for OpenGL engine
 # include_directories(vendor/src/vulkan/include)
@@ -42,6 +46,7 @@ set(ASSIMP_BUILD_GLTF_IMPORTER ON CACHE BOOL "")
 # add vendors
 add_subdirectory(vendor/src/glfw)
 add_subdirectory(vendor/src/assimp)
+add_subdirectory(vendor/src/meshoptimizer)
 
 if(WIN32)
 	add_definitions(-D_CRT_SECURE_NO_WARNINGS)
@@ -69,6 +74,7 @@ set_property(TARGET glfw          PROPERTY FOLDER "ThirdPartyLibraries")
 set_property(TARGET update_mappings          PROPERTY FOLDER "ThirdPartyLibraries")
 set_property(TARGET glad          PROPERTY FOLDER "ThirdPartyLibraries")
 set_property(TARGET assimp        PROPERTY FOLDER "ThirdPartyLibraries")
+set_property(TARGET meshoptimizer PROPERTY FOLDER "ThirdPartyLibraries")
 if(WIN32)
 set_property(TARGET zlibstatic    PROPERTY FOLDER "ThirdPartyLibraries")
 set_property(TARGET UpdateAssimpLibsDebugSymbolsAndDLLs PROPERTY FOLDER "ThirdPartyLibraries")
@@ -88,3 +94,4 @@ add_subdirectory(Samples/06Duck)
 add_subdirectory(Samples/07VertexPulling)
 add_subdirectory(Samples/08VertexIndexPulling)
 add_subdirectory(Samples/09CubeMap)
+add_subdirectory(Samples/10MeshOpt)
