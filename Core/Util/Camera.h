@@ -51,6 +51,7 @@ private:
 	glm::vec3 mCameraPosition    = glm::vec3(0.0f, 10.f, 10.0f);
 	glm::quat mCameraOrientation = glm::quat(glm::vec3(0.f));
 	glm::vec3 mMoveSpeed         = glm::vec3(0.f);
+	glm::vec3 mUp                = glm::vec3(0.0f, 1.0f, 0.0f);
 };
 
 class Camera

@@ -35,12 +35,12 @@ void main()
 {
 	int idx = indices[gl_VertexID];
 
-	vec4 posW = model * vec4(pos[idx], 1.0);
+	// vec4 posW = model * vec4(pos[idx], 1.0);
 	// always center sky about camera
 	// posW.xyz += cameraPos.xyz;
 	// set z = w so that z/w = 1 (sky always on far plane)
 	// gl_Position = (vp * posW).xyww;
-	gl_Position = vp * posW;
+	gl_Position = vp * model * vec4(pos[idx], 1.0);
 
 	// use local vertex position as cubemap lookup vector
 	dir = pos[idx].xyz;

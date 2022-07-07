@@ -3,7 +3,7 @@
 CameraPositionerFirstPerson::CameraPositionerFirstPerson(const glm::vec3& pos,
                                                          const glm::vec3& target,
                                                          const glm::vec3& up)
-	: mCameraPosition(pos), mCameraOrientation(glm::lookAt(pos, target, up))
+	: mCameraPosition(pos), mCameraOrientation(glm::lookAt(pos, target, up)), mUp(up)
 {
 }
 
@@ -14,6 +14,8 @@ void CameraPositionerFirstPerson::update(double deltaSeconds, const glm::vec2& m
 		const glm::vec2 delta     = mousePos - mMousePos;
 		const glm::quat deltaQuat = glm::quat(glm::vec3(mMouseSpeed * delta.y, mMouseSpeed * delta.x, 0.f));
 		mCameraOrientation        = glm::normalize(deltaQuat * mCameraOrientation);
+		//!? Note: this line is important. It prevents unwanted camera roll from happening. 
+		setUpVector(mUp);
 	}
 	mMousePos = mousePos;
 
