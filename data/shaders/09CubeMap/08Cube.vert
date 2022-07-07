@@ -34,6 +34,14 @@ const int indices[36] = int[36](
 void main()
 {
 	int idx = indices[gl_VertexID];
-	gl_Position = mvp * vec4(pos[idx], 1.0);
+
+	vec4 posW = model * vec4(pos[idx], 1.0);
+	// always center sky about camera
+	// posW.xyz += cameraPos.xyz;
+	// set z = w so that z/w = 1 (sky always on far plane)
+	// gl_Position = (vp * posW).xyww;
+	gl_Position = vp * posW;
+
+	// use local vertex position as cubemap lookup vector
 	dir = pos[idx].xyz;
 }

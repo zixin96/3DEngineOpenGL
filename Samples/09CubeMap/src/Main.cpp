@@ -8,7 +8,7 @@
 #include "OpenGL/GLShader.h"
 #include "OpenGL/GLProgram.h"
 #include "OpenGL/GLTexture.h"
-
+#include "Util/Camera.h"
 #include "Util/Debug.h"
 
 using glm::mat4;
@@ -35,7 +35,7 @@ using std::endl;
 struct PerFrameData
 {
 	mat4 model;
-	mat4 mvp;
+	mat4 viewProj;
 	vec4 cameraPos;
 };
 
@@ -45,6 +45,15 @@ struct VertexData
 	vec3 n;
 	vec2 tc;
 };
+
+struct MouseState
+{
+	glm::vec2 pos         = glm::vec2(0.0f);
+	bool      pressedLeft = false;
+}             gMouseState;
+
+CameraPositionerFirstPerson gPositioner(vec3(0.0f), vec3(0.0f, 0.0f, -1.0f), vec3(0.0f, 1.0f, 0.0f));
+Camera                      gCamera(gPositioner);
 
 int main()
 {
@@ -76,11 +85,25 @@ int main()
 	// set a callback for key events
 	glfwSetKeyCallback(window, [](GLFWwindow* window, int key, int scancode, int action, int mods)
 	{
-		// press escape key will close the window
-		if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
-		{
+		const bool pressed = action != GLFW_RELEASE;
+		if (key == GLFW_KEY_ESCAPE && pressed)
 			glfwSetWindowShouldClose(window, GLFW_TRUE);
-		}
+		if (key == GLFW_KEY_W)
+			gPositioner.mMovement.forward = pressed;
+		if (key == GLFW_KEY_S)
+			gPositioner.mMovement.backward = pressed;
+		if (key == GLFW_KEY_A)
+			gPositioner.mMovement.left = pressed;
+		if (key == GLFW_KEY_D)
+			gPositioner.mMovement.right = pressed;
+		if (key == GLFW_KEY_1)
+			gPositioner.mMovement.up = pressed;
+		if (key == GLFW_KEY_2)
+			gPositioner.mMovement.down = pressed;
+		if (mods & GLFW_MOD_SHIFT)
+			gPositioner.mMovement.fastSpeed = pressed;
+		if (key == GLFW_KEY_SPACE)
+			gPositioner.setUpVector(vec3(0.0f, 1.0f, 0.0f));
 
 		// press F9 to save a screenshot 
 		if (key == GLFW_KEY_F9 && action == GLFW_PRESS)
@@ -92,6 +115,20 @@ int main()
 			stbi_write_png("images/screenshot.png", width, height, 4, ptr, 0);
 			free(ptr);
 		}
+	});
+
+	glfwSetCursorPosCallback(window, [](auto* window, double x, double y)
+	{
+		int width, height;
+		glfwGetFramebufferSize(window, &width, &height);
+		gMouseState.pos.x = static_cast<float>(x / width);
+		gMouseState.pos.y = static_cast<float>(y / height);
+	});
+
+	glfwSetMouseButtonCallback(window, [](auto* window, int button, int action, int mods)
+	{
+		if (button == GLFW_MOUSE_BUTTON_LEFT)
+			gMouseState.pressedLeft = action == GLFW_PRESS;
 	});
 
 	// prepare OpenGL context
@@ -173,30 +210,47 @@ int main()
 	glEnable(GL_DEPTH_TEST);
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
+	double timeStamp    = glfwGetTime();
+	float  deltaSeconds = 0.0f;
+
 	while (!glfwWindowShouldClose(window))
 	{
+		gPositioner.update(deltaSeconds, gMouseState.pos, gMouseState.pressedLeft);
+
+		const double newTimeStamp = glfwGetTime();
+		deltaSeconds              = static_cast<float>(newTimeStamp - timeStamp);
+		timeStamp                 = newTimeStamp;
+
 		int width, height;
 		glfwGetFramebufferSize(window, &width, &height);
 		const float ratio = width / (float)height;
 		glViewport(0, 0, width, height);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		const mat4 p = glm::perspective(45.0f, ratio, 0.1f, 1000.0f);
+		const mat4 perspectiveMat = glm::perspective(45.0f, ratio, 0.1f, 1000.0f);
+		const mat4 viewMat        = gCamera.getViewMatrix();
 
 		{
-			const mat4 m = glm::rotate(glm::translate(mat4(1.0f), vec3(0.0f, -0.5f, -1.5f)),
-			                           (float)glfwGetTime(),
-			                           vec3(0.0f, 1.0f, 0.0f));
-			const PerFrameData perFrameData = {.model = m, .mvp = p * m, .cameraPos = vec4(0.0f)};
+			const mat4 modelMat = glm::rotate(glm::translate(mat4(1.0f), vec3(0.0f, -0.5f, -1.5f)),
+			                                  (float)glfwGetTime(),
+			                                  vec3(0.0f, 1.0f, 0.0f));
+			const PerFrameData perFrameData = {
+				.model = modelMat,
+				.viewProj = perspectiveMat * viewMat,
+				.cameraPos = glm::vec4(gCamera.getPosition(), 1.0f)
+			};
 			glNamedBufferSubData(perFrameDataBuffer.getHandle(), 0, perFrameDataSize, &perFrameData);
 			progModel.useProgram();
 			glDrawArrays(GL_TRIANGLES, 0, static_cast<unsigned>(indices.size()));
 		}
 
 		{
-			const mat4 m = glm::scale(mat4(1.0f), vec3(2.0f));
-
-			const PerFrameData perFrameData = {.model = m, .mvp = p * m, .cameraPos = vec4(0.0f)};
+			const mat4         modelMat     = glm::scale(mat4(1.0f), vec3(2.0f));
+			const PerFrameData perFrameData = {
+				.model = modelMat,
+				.viewProj = perspectiveMat * viewMat,
+				.cameraPos = glm::vec4(gCamera.getPosition(), 1.0f)
+			};
 			glNamedBufferSubData(perFrameDataBuffer.getHandle(), 0, perFrameDataSize, &perFrameData);
 			progCube.useProgram();
 			glDrawArrays(GL_TRIANGLES, 0, 36);

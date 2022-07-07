@@ -1,7 +1,7 @@
 layout (std140, binding = 0) uniform PerFrameData
 {
     mat4 model;
-	mat4 mvp;
+    mat4 vp;
     vec4 cameraPos;
 };
 
