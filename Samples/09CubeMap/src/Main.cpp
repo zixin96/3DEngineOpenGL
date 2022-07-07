@@ -213,7 +213,9 @@ int main()
 	// depth test is required to render 3D objects
 	glEnable(GL_DEPTH_TEST);
 	// for sky dome rendering, we need to adjust the depth func
-	glDepthFunc(GL_LEQUAL);  
+	glDepthFunc(GL_LEQUAL);
+	// since you are inside a cube, you need to consider disabling back face culling as well
+	// in this we don't need to
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
 	double timeStamp    = glfwGetTime();

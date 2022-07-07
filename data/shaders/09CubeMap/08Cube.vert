@@ -34,8 +34,8 @@ const int indices[36] = int[36](
 void main()
 {
 	mat4 model = inModelMatrices[gl_BaseInstance];
-	
 	int idx = indices[gl_VertexID];
+
 	vec4 posW = model * vec4(pos[idx], 1.0);
 	// always center sky about camera
 	posW.xyz += cameraPos.xyz;
