@@ -212,6 +212,8 @@ int main()
 
 	// depth test is required to render 3D objects
 	glEnable(GL_DEPTH_TEST);
+	// for sky dome rendering, we need to adjust the depth func
+	glDepthFunc(GL_LEQUAL);  
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
 	double timeStamp    = glfwGetTime();
