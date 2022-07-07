@@ -39,6 +39,8 @@ Mesh ConvertAssimpMesh(const aiMesh* m)
 		.materialID = 0, // we are not yet exporting materials
 		.meshSize = meshSize,
 		.vertexCount = m->mNumVertices,
+		.indexOffset = gIndexOffset,
+		.vertexOffset = gVertexOffset,
 		.lodOffset = {
 			gIndexOffset * sizeof(uint32_t),
 			(gIndexOffset + numIndices) * sizeof(uint32_t)

@@ -21,6 +21,10 @@ struct Mesh final
 	// vertex count is the total # of vertices in this mesh
 	uint32_t vertexCount;
 
+	// The total count of all previous vertices in this mesh file 
+	uint32_t indexOffset = 0;
+	uint32_t vertexOffset = 0;
+
 	// this array stores the offsets to the beginning of each LOD.
 	// this array contains one extra item at the end, which serves as a marker to calculate the size of the last LOD
 	uint32_t lodOffset[MAX_LODS] = {0};
@@ -32,7 +36,7 @@ struct Mesh final
 	uint32_t streamElementSize[MAX_STREAMS] = {0};
 
 	// calculate the sizes of each LOD
-	uint32_t lodSize(uint32_t lod) { return lodOffset[lod + 1] - lodOffset[lod]; }
+	uint32_t getLODIndicesCount(uint32_t lod) const { return lodOffset[lod + 1] - lodOffset[lod]; }
 };
 
 // our mesh data file begins with a simple header to allows for the rapid fetching of the mesh list
