@@ -41,8 +41,8 @@ public:
 	// how responsive the camera will be to acceleration and damping.
 	// tweak these as you see fit
 	float mMouseSpeed = 4.0f;
-	float mAccel      = 150.0f;
-	float mDamping    = 0.2f;
+	float mAccel      = 50.0f;
+	float mDamping    = 0.1f;
 	float mMaxSpeed   = 10.0f;
 	float mFastCoef   = 10.0f;
 
