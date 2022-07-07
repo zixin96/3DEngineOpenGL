@@ -2,9 +2,9 @@
 
 layout (std140, binding = 0) uniform PerFrameData
 {
-    mat4 model;
-	mat4 vp;
-    vec4 cameraPos;
+	mat4 view;
+	mat4 proj;
+	vec4 cameraPos;
 };
 
 struct PerVertex

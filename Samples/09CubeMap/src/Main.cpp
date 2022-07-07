@@ -34,8 +34,8 @@ using std::endl;
 
 struct PerFrameData
 {
-	mat4 model;
-	mat4 viewProj;
+	mat4 view;
+	mat4 proj;
 	vec4 cameraPos;
 };
 
@@ -198,6 +198,10 @@ int main()
 	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, vertexBuffer.getHandle());
 	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, indexBuffer.getHandle());
 
+	// model matrices
+	GLBuffer modelMatrices(2 * sizeof(mat4), nullptr, GL_DYNAMIC_STORAGE_BIT);
+	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 2, modelMatrices.getHandle());
+
 	GLTexture duckBaseColor(GL_TEXTURE_2D, "data/rubber_duck/textures/Duck_baseColor.png");
 	GLuint    duckBaseColorHandle = duckBaseColor.getHandle();
 	glBindTextures(0, 1, &duckBaseColorHandle);
@@ -227,34 +231,31 @@ int main()
 		glViewport(0, 0, width, height);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		const mat4 perspectiveMat = glm::perspective(45.0f, ratio, 0.1f, 1000.0f);
-		const mat4 viewMat        = gCamera.getViewMatrix();
+		// bind per-frame data in the scene once
+		const mat4         projMat      = glm::perspective(45.0f, ratio, 0.1f, 1000.0f);
+		const mat4         viewMat      = gCamera.getViewMatrix();
+		const PerFrameData perFrameData = {
+			.view = viewMat,
+			.proj = projMat,
+			.cameraPos = glm::vec4(gCamera.getPosition(), 1.0f)
+		};
+		glNamedBufferSubData(perFrameDataBuffer.getHandle(), 0, perFrameDataSize, &perFrameData);
 
+		// bind all model matrices in the scene once
+		const mat4 Matrices[2]
 		{
-			const mat4 modelMat = glm::rotate(glm::translate(mat4(1.0f), vec3(0.0f, -0.5f, -1.5f)),
-			                                  (float)glfwGetTime(),
-			                                  vec3(0.0f, 1.0f, 0.0f));
-			const PerFrameData perFrameData = {
-				.model = modelMat,
-				.viewProj = perspectiveMat * viewMat,
-				.cameraPos = glm::vec4(gCamera.getPosition(), 1.0f)
-			};
-			glNamedBufferSubData(perFrameDataBuffer.getHandle(), 0, perFrameDataSize, &perFrameData);
-			progModel.useProgram();
-			glDrawArrays(GL_TRIANGLES, 0, static_cast<unsigned>(indices.size()));
-		}
+			glm::rotate(glm::translate(mat4(1.0f), vec3(0.0f, -0.5f, -1.5f)), (float)glfwGetTime(), vec3(0.0f, 1.0f, 0.0f)),
+			glm::scale(mat4(1.0f), vec3(10.0f))
+		};
+		glNamedBufferSubData(modelMatrices.getHandle(), 0, sizeof(mat4) * 2, Matrices);
 
-		{
-			const mat4         modelMat     = glm::scale(mat4(1.0f), vec3(2.0f));
-			const PerFrameData perFrameData = {
-				.model = modelMat,
-				.viewProj = perspectiveMat * viewMat,
-				.cameraPos = glm::vec4(gCamera.getPosition(), 1.0f)
-			};
-			glNamedBufferSubData(perFrameDataBuffer.getHandle(), 0, perFrameDataSize, &perFrameData);
-			progCube.useProgram();
-			glDrawArrays(GL_TRIANGLES, 0, 36);
-		}
+		progModel.useProgram();
+		// baseInstance = 0 => gl_BaseInstance = 0 => use gl_BaseInstance to fetch the right model matrix
+		glDrawArraysInstancedBaseInstance(GL_TRIANGLES, 0, static_cast<unsigned>(indices.size()), 1, 0);
+
+		progCube.useProgram();
+		// baseInstance = 1 => gl_BaseInstance = 1 => use gl_BaseInstance to fetch the right model matrix
+		glDrawArraysInstancedBaseInstance(GL_TRIANGLES, 0, 36, 1, 1);
 
 		glfwSwapBuffers(window);
 		glfwPollEvents();

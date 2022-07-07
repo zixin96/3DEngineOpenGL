@@ -1,8 +1,8 @@
 layout (std140, binding = 0) uniform PerFrameData
 {
-    mat4 model;
-    mat4 vp;
-    vec4 cameraPos;
+	mat4 view;
+	mat4 proj;
+	vec4 cameraPos;
 };
 
 // This struct should match vertex struct in c++ side
@@ -25,4 +25,9 @@ layout (std430, binding = 0) readonly buffer Vertices
 layout(std430, binding = 1) readonly buffer Indices
 {
 	uint inIndices[];
+};
+
+layout(std430, binding = 2) readonly buffer Matrices
+{
+	mat4 inModelMatrices[];
 };

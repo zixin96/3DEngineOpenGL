@@ -28,11 +28,14 @@ vec2 getTexCoord(uint i)
 
 void main()
 {
+    mat4 model = inModelMatrices[gl_BaseInstance];
+    mat4 mvp = proj * view * model;
+
     // fetch index from storage buffer
 	uint positionIndex = inIndices[gl_VertexID];
 
     vec3 pos = getPosition(positionIndex);
-    gl_Position = vp * model * vec4(pos, 1.0);
+    gl_Position = mvp * vec4(pos, 1.0);
     mat3 normalMatrix = mat3(transpose(inverse(model)));
 
     vtx.uv = getTexCoord(positionIndex);
