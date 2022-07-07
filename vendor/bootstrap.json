@@ -94,5 +94,13 @@
             "url": "https://github.com/zeux/meshoptimizer.git",
             "revision": "v0.16"
         }
+    },
+    {
+        "name": "argh",
+        "source": {
+            "type": "git",
+            "url": "https://github.com/adishavit/argh.git",
+            "revision": "v1.3.2"
+        }
     }
 ]

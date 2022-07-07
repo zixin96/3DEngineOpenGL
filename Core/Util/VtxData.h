@@ -8,7 +8,8 @@ constexpr uint32_t MAX_STREAMS = 8;
 
 struct Mesh final
 {
-	uint32_t lodCout;
+	uint32_t lodCount;
+
 	uint32_t streamCount;
 
 	// an abstract ID that allows us to reference any material data that is stored else where
@@ -20,17 +21,18 @@ struct Mesh final
 	// vertex count is the total # of vertices in this mesh
 	uint32_t vertexCount;
 
-	// this array stores the offsets to the beginning of each LOD
-	uint32_t lodOffset[MAX_LODS];
-
-	// calculate the sizes of each LOD
-	uint64_t lodSize(uint32_t lod) { return lodOffset[lod + 1] - lodOffset[lod]; }
+	// this array stores the offsets to the beginning of each LOD.
+	// this array contains one extra item at the end, which serves as a marker to calculate the size of the last LOD
+	uint32_t lodOffset[MAX_LODS] = {0};
 
 	// store the offset for each stream
-	uint64_t streamOffset[MAX_STREAMS];
+	uint32_t streamOffset[MAX_STREAMS] = {0};
 
 	// store element size for each stream: e.g. Vertex only has size 3, Vertex + TexCoord has size 6
-	uint32_t streamElementSize[MAX_STREAMS];
+	uint32_t streamElementSize[MAX_STREAMS] = {0};
+
+	// calculate the sizes of each LOD
+	uint32_t lodSize(uint32_t lod) { return lodOffset[lod + 1] - lodOffset[lod]; }
 };
 
 // our mesh data file begins with a simple header to allows for the rapid fetching of the mesh list
@@ -54,8 +56,8 @@ struct MeshData
 {
 	std::vector<Mesh> meshes;
 	// TODO: you could combine index and vertex data into a single large byte buffer
-	std::vector<uint8_t> indexData;
-	std::vector<uint8_t> vertexData;
+	std::vector<uint32_t> indexData;
+	std::vector<float>    vertexData;
 };
 
 MeshFileHeader loadMeshData(const char* meshFile, MeshData& out);
