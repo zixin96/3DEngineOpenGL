@@ -54,7 +54,7 @@ int main()
 	GLShader  shdGridVertex("data/shaders/13Tessellation/grid.vert");
 	GLShader  shdGridFragment("data/shaders/13Tessellation/grid.frag");
 	GLProgram progGrid(shdGridVertex, shdGridFragment);
-	
+
 	GLShader  shaderVertex("data/shaders/13Tessellation/duck.vert");
 	GLShader  shaderTessControl("data/shaders/13Tessellation/duck.tesc");
 	GLShader  shaderTessEval("data/shaders/13Tessellation/duck.tese");
@@ -170,7 +170,9 @@ int main()
 	{
 		ImGuiIO& io = ImGui::GetIO();
 
-		gPositioner.update(app.getDeltaSeconds(), gMouseState.pos, gMouseState.pressedLeft);
+		gPositioner.update(app.getDeltaSeconds(),
+		                   gMouseState.pos,
+		                   gMouseState.pressedLeft && !io.WantCaptureMouse); // "&& !io.WantCaptureMouse" part prevents camera from moving when we interact with imgui
 
 		int width, height;
 		glfwGetFramebufferSize(app.getWindow(), &width, &height);
@@ -196,7 +198,7 @@ int main()
 
 		glBindVertexArray(vao);
 		glEnable(GL_DEPTH_TEST);
-		
+
 		glDisable(GL_BLEND);
 		program.useProgram();
 		glBindTextures(0, 1, &duckBaseColorHandle);
