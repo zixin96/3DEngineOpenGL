@@ -24,6 +24,78 @@ uint32_t gNumElementsToStore = 3;
 
 float gMeshScale = 0.01f;
 
+void processLods(std::vector<uint32_t>& indices, std::vector<float>& vertices, std::vector<std::vector<uint32_t>>& outLods)
+{
+	// since each vertex has 3 float values, we can compute the total # of vertices here: 
+	size_t verticesCountIn = vertices.size() / 3; //? Book says "/ 2".
+
+	size_t targetIndicesCount = indices.size();
+
+	// the first LOD corresponds to the original mesh indices
+	uint8_t LOD = 1;
+
+	printf("\n   LOD0: %i indices", int(indices.size()));
+
+	outLods.push_back(indices);
+
+	// iterate until the number of indices in the last LOD drops below 1024,
+	// or the total # number of generated LODs reaches 8
+	while (targetIndicesCount > 1024 && LOD < 8)
+	{
+		// each subsequent LOD should have half of the # of indices from the previous LOD
+		targetIndicesCount = indices.size() / 2;
+
+		bool sloppy = false;
+
+		// try non-sloppy simplification first
+		size_t numOptIndices = meshopt_simplify(indices.data(),
+		                                        indices.data(),
+		                                        (uint32_t)indices.size(),
+		                                        vertices.data(),
+		                                        verticesCountIn,
+		                                        sizeof(float) * 3,
+		                                        targetIndicesCount,
+		                                        0.02f); // allow the algorithm to have 2% deviation from the original mesh
+
+		// if the above algorithm is unable to achieve at least a 10% reduction, we will switch to sloppy simplification
+		if (static_cast<size_t>(numOptIndices * 1.1f) > indices.size())
+		{
+			if (LOD > 1)
+			{
+				// try harder
+				numOptIndices = meshopt_simplifySloppy(indices.data(),
+				                                       indices.data(),
+				                                       indices.size(),
+				                                       vertices.data(),
+				                                       verticesCountIn,
+				                                       sizeof(float) * 3,
+				                                       targetIndicesCount,
+				                                       0.02f);
+				sloppy = true;
+
+				// give up and terminate the sequence if the sloppy ver. doesn't simplify further
+				if (numOptIndices == indices.size()) { break; }
+			}
+			else
+			{
+				// if the first sequence doesn't achieve the desired LOD count, give up and terminate the sequence
+				break;
+			}
+		}
+
+		indices.resize(numOptIndices);
+
+		// reorder indices for vertex cache
+		meshopt_optimizeVertexCache(indices.data(), indices.data(), indices.size(), verticesCountIn);
+
+		printf("\n   LOD%i: %i indices %s", int(LOD), int(numOptIndices), sloppy ? "[sloppy]" : "");
+
+		LOD++;
+
+		outLods.push_back(indices);
+	}
+}
+
 Mesh ConvertAssimpMesh(const aiMesh* m)
 {
 	// assume there is a single LOD and all the vertex data is stored as a continuous data stream.
