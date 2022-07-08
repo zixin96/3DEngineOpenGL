@@ -84,43 +84,43 @@ void APIENTRY glDebugOutput(GLenum       source,
 
 
 static const char* shaderCodeVertexImGui = R"(
-#version 460 core
-layout (location = 0) in vec2 Position;
-layout (location = 1) in vec2 UV;
-layout (location = 2) in vec4 Color;
+	#version 460 core
+	layout (location = 0) in vec2 Position;
+	layout (location = 1) in vec2 UV;
+	layout (location = 2) in vec4 Color;
 
-layout (std140, binding = 0) uniform PerFrameData
-{
-	mat4 mvp;
-};
+	layout (std140, binding = 0) uniform PerFrameData
+	{
+		mat4 mvp;
+	};
 
-layout (location = 0) out vec2 Frag_UV;
-layout (location = 1) out vec4 Frag_Color;
+	layout (location = 0) out vec2 Frag_UV;
+	layout (location = 1) out vec4 Frag_Color;
 
-void main()
-{
-	Frag_UV = UV;
-	Frag_Color = Color;
-	gl_Position = mvp * vec4(Position.xy, 0.0, 1.0);
-}
+	void main()
+	{
+		Frag_UV = UV;
+		Frag_Color = Color;
+		gl_Position = mvp * vec4(Position.xy, 0.0, 1.0);
+	}
 
 )";
 
 static const char* shaderCodeFragmentImGui = R"(
-#version 460 core
+	#version 460 core
 
-layout (location = 0) in vec2 Frag_UV;
-layout (location = 1) in vec4 Frag_Color;
+	layout (location = 0) in vec2 Frag_UV;
+	layout (location = 1) in vec4 Frag_Color;
 
-layout (location = 0) out vec4 out_Color;
+	layout (location = 0) out vec4 out_Color;
 
-layout (binding = 0) uniform sampler2D Texture;
+	layout (binding = 0) uniform sampler2D Texture;
 
-void main()
-{
-	out_Color = Frag_Color * texture(Texture, Frag_UV);
-}
-	)";
+	void main()
+	{
+		out_Color = Frag_Color * texture(Texture, Frag_UV);
+	}
+)";
 
 int main()
 {

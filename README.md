@@ -37,6 +37,8 @@ layout (std140, binding = 0) uniform PerFrameData
 - Programmable vertex pulling (PVP) data storage approach
 - HDR Cube map: 6 faces or equirectangular format or vertical/horizontal cross
 - Custom mesh preprocessing pipeline 
+- Real-time discrete LOD algorithms
+- Dynamic LOD based on tessellation
 
 
 
@@ -51,7 +53,17 @@ layout (std140, binding = 0) uniform PerFrameData
 
 
 
-## Debugging
+
+
+### PVP: Vertex or Vertex and Index Pulling? 
+
+> I’ve also shown that programmable vertex pulling can only be prohibitive from a performance point of view if we are using programmable indexed primitive rendering, as in this case the lack of post-transform vertex cache utilization can dramatically decrease the performance. - OpenGL Insights
+
+Pulling index could be detrimental to performance. 
+
+
+
+### Bloopers
 
 Nothing shows up on the screen. What happened??? In this case, we forgot to bind the perframe uniform buffer. RenderDoc can help us to that "No Resource" has been bound to PerFrame
 
@@ -95,3 +107,20 @@ for (size_t i = 0; i != m->mNumFaces; i++)
 }
 ```
 
+---
+
+WAT THE DUCK??: 
+
+![image-20220708142617537](images/image-20220708142617537.png)
+
+```glsl
+struct VertexData
+{
+    float pos[3];
+    float tc[3]; //!!!! Should be float tc[2]
+};
+```
+
+Fix:
+
+![image-20220708142754600](images/image-20220708142754600.png)

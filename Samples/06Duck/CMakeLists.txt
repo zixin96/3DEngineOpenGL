@@ -4,4 +4,4 @@ include(../../CommonMacros.txt)
 
 SETUP_APP(06Duck "Samples")
 
-target_link_libraries(06Duck glad glfw assimp)
+target_link_libraries(06Duck glad glfw assimp Core)

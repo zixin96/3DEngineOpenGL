@@ -28,6 +28,8 @@ struct MouseState
 CameraPositionerFirstPerson gPositioner(vec3(-31.5f, 7.5f, -9.5f), vec3(0.0f, 0.0f, -1.0f), vec3(0.0f, 1.0f, 0.0f));
 Camera                      gCamera(gPositioner);
 
+const char* gMeshToLoad = "vendor/src/meshes/exterior.mesh";
+
 int main()
 {
 	GLApp app;
@@ -43,7 +45,7 @@ int main()
 
 	// read the converted mesh data from a given file and load it into a new GLMesh object
 	MeshData             meshData;
-	const MeshFileHeader header = loadMeshData("vendor/src/meshes/exterior.mesh", meshData);
+	const MeshFileHeader header = loadMeshData(gMeshToLoad, meshData);
 	GLMesh               mesh(header, meshData.meshes.data(), meshData.indexData.data(), meshData.vertexData.data());
 
 	// bind per-frame uniform buffer

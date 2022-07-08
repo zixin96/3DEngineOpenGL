@@ -103,5 +103,6 @@ add_subdirectory(Samples/09CubeMap)
 add_subdirectory(Samples/10MeshOpt)
 add_subdirectory(Samples/11DebugGrid)
 add_subdirectory(Samples/12MeshRenderer)
+add_subdirectory(Samples/13Tessellation)
 
 add_subdirectory(Tools/MeshConversionTool)

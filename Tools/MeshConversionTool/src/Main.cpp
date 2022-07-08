@@ -22,7 +22,7 @@ bool gExportNormals  = false;
 // by default, we export only the vertex position into the output file
 uint32_t gNumElementsToStore = 3;
 
-float gMeshScale = 0.01f;
+// float gMeshScale = 0.01f;
 
 void processLods(std::vector<uint32_t>& indices, std::vector<float>& vertices, std::vector<std::vector<uint32_t>>& outLods)
 {
@@ -111,9 +111,13 @@ Mesh ConvertAssimpMesh(const aiMesh* m)
 		const aiVector3D& t = hasTexCoords ? m->mTextureCoords[0][i] : aiVector3D();
 
 		// apply a global mesh scale, o.w. mesh is too big
-		gMeshData.vertexData.push_back(v.x * gMeshScale);
-		gMeshData.vertexData.push_back(v.y * gMeshScale);
-		gMeshData.vertexData.push_back(v.z * gMeshScale);
+		// gMeshData.vertexData.push_back(v.x * gMeshScale);
+		// gMeshData.vertexData.push_back(v.y * gMeshScale);
+		// gMeshData.vertexData.push_back(v.z * gMeshScale);
+
+		gMeshData.vertexData.push_back(v.x);
+		gMeshData.vertexData.push_back(v.y);
+		gMeshData.vertexData.push_back(v.z);
 
 		if (gExportTextures)
 		{
