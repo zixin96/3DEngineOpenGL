@@ -61,7 +61,7 @@ void main()
 
 //	out_FragColor = vec4((n + vec3(1.0))*0.5, 1.0);
 //	out_FragColor = Kao;
-//	out_FragColor = Ke;
 //	out_FragColor = Kd;
+//	out_FragColor = Ke;
 //	out_FragColor = vec4(MeR, 0.0, 1.0);
 };

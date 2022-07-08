@@ -58,19 +58,28 @@ int main()
 	GLBuffer         perFrameDataBuffer(kUniformBufferSize, nullptr, GL_DYNAMIC_STORAGE_BIT);
 	glBindBufferRange(GL_UNIFORM_BUFFER, 0, perFrameDataBuffer.getHandle(), 0, kUniformBufferSize);
 
-	glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glEnable(GL_DEPTH_TEST);
 
 	const aiScene* scene = aiImportFile("vendor/src/glTF-Sample-Models/2.0/DamagedHelmet/glTF/DamagedHelmet.gltf",
 	                                    aiProcess_Triangulate);
-
+	
 	if (!scene || !scene->HasMeshes())
 	{
 		printf("Unable to load vendor/src/glTF-Sample-Models/2.0/DamagedHelmet/glTF/DamagedHelmet.gltf\n");
 		exit(255);
 	}
+
+	// const aiScene* scene = aiImportFile("vendor/src/glTF-Sample-Models/2.0/WaterBottle/glTF/WaterBottle.gltf",
+	//                                     aiProcess_Triangulate);
+	//
+	// if (!scene || !scene->HasMeshes())
+	// {
+	// 	printf("Unable to load vendor/src/glTF-Sample-Models/2.0/WaterBottle/glTF/WaterBottle.gltf\n");
+	// 	exit(255);
+	// }
 
 	std::vector<VertexData> vertices;
 	std::vector<uint32_t>   indices;
@@ -104,6 +113,12 @@ int main()
 	GLTexture texAlbedo(GL_TEXTURE_2D, "vendor/src/glTF-Sample-Models/2.0/DamagedHelmet/glTF/Default_albedo.jpg");
 	GLTexture texMeR(GL_TEXTURE_2D, "vendor/src/glTF-Sample-Models/2.0/DamagedHelmet/glTF/Default_metalRoughness.jpg");
 	GLTexture texNormal(GL_TEXTURE_2D, "vendor/src/glTF-Sample-Models/2.0/DamagedHelmet/glTF/Default_normal.jpg");
+
+	// GLTexture texAO(GL_TEXTURE_2D, "vendor/src/glTF-Sample-Models/2.0/WaterBottle/glTF/WaterBottle_occlusionRoughnessMetallic.png");
+	// GLTexture texEmissive(GL_TEXTURE_2D, "vendor/src/glTF-Sample-Models/2.0/WaterBottle/glTF/WaterBottle_emissive.png");
+	// GLTexture texAlbedo(GL_TEXTURE_2D, "vendor/src/glTF-Sample-Models/2.0/WaterBottle/glTF/WaterBottle_baseColor.png");
+	// GLTexture texMeR(GL_TEXTURE_2D, "vendor/src/glTF-Sample-Models/2.0/WaterBottle/glTF/WaterBottle_occlusionRoughnessMetallic.png");
+	// GLTexture texNormal(GL_TEXTURE_2D, "vendor/src/glTF-Sample-Models/2.0/WaterBottle/glTF/WaterBottle_normal.png");
 
 	const GLuint textures[] = {
 		texAO.getHandle(),
@@ -195,6 +210,10 @@ int main()
 		const mat4 rot   = glm::rotate(mat4(1.0f), glm::radians(90.0f), vec3(1.0f, 0.0f, 0.0f));
 		const mat4 pos   = glm::translate(mat4(1.0f), vec3(0.0f, 0.0f, -1.0f));
 		const mat4 m     = glm::rotate(scale * rot * pos, (float)glfwGetTime() * 0.1f, vec3(0.0f, 0.0f, 1.0f));
+
+		// const mat4 pos   = glm::translate(mat4(1.0f), vec3(0.0f, 0.0f, -5.0f));
+		// const mat4 m     = glm::scale(pos, vec3(55.0f));
+
 		glNamedBufferSubData(modelMatrices.getHandle(), 0, sizeof(mat4), value_ptr(m));
 
 		glEnable(GL_DEPTH_TEST);
