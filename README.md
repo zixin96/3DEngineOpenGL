@@ -39,6 +39,9 @@ layout (std140, binding = 0) uniform PerFrameData
 - Custom mesh preprocessing pipeline 
 - Real-time discrete LOD algorithms
 - Dynamic LOD based on tessellation
+- Physically based rendering (PBR) using glTF 2.0 shading model
+  - precomputing irradiance maps
+  - Bidirectional reflectance distribution function (BRDF) lookup tables (LUTs)
 
 
 
