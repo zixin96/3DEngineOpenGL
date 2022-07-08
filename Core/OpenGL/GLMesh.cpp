@@ -57,7 +57,7 @@ GLMesh::GLMesh(const MeshFileHeader& header,
 	// }
 	//
 	// glNamedBufferSubData(mIndirectCommandBuffer.getHandle(), 0, drawCommands.size(), drawCommands.data());
-	// glBindVertexArray(mVAO);
+	glBindVertexArray(mVAO);
 }
 
 void GLMesh::draw(const MeshFileHeader& header) const

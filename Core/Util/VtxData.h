@@ -21,10 +21,6 @@ struct Mesh final
 	// vertex count is the total # of vertices in this mesh
 	uint32_t vertexCount;
 
-	// The total count of all previous vertices in this mesh file 
-	uint32_t indexOffset = 0;
-	uint32_t vertexOffset = 0;
-
 	// this array stores the offsets to the beginning of each LOD.
 	// this array contains one extra item at the end, which serves as a marker to calculate the size of the last LOD
 	uint32_t lodOffset[MAX_LODS] = {0};

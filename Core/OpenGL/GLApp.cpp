@@ -28,8 +28,8 @@ GLApp::GLApp()
 	const GLFWvidmode* info = glfwGetVideoMode(glfwGetPrimaryMonitor());
 	glfwGetMonitorPos(glfwGetPrimaryMonitor(), &monitorX, &monitorY);
 
-	windowWidth = (int)(info->width * 0.95f);
-	windowHeight = (int)(info->height * 0.95f);
+	windowWidth = (int)(info->width * 0.85f);
+	windowHeight = (int)(info->height * 0.85f);
 
 	mWindow = glfwCreateWindow(windowWidth, windowHeight, "Simple example", nullptr, nullptr);
 	glfwSetWindowPos(mWindow,

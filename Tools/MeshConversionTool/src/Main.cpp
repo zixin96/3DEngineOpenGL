@@ -22,48 +22,31 @@ bool gExportNormals  = false;
 // by default, we export only the vertex position into the output file
 uint32_t gNumElementsToStore = 3;
 
+float gMeshScale = 0.01f;
+
 Mesh ConvertAssimpMesh(const aiMesh* m)
 {
 	// assume there is a single LOD and all the vertex data is stored as a continuous data stream.
 	// we also ignore all the material information and deal exclusively with the index and vertex data.
 
-	const bool     hasTexCoords      = m->HasTextureCoords(0);
-	const uint32_t numIndices        = m->mNumFaces * 3;
-	const uint32_t numElements       = gNumElementsToStore;
-	const uint32_t streamElementSize = static_cast<uint32_t>(numElements * sizeof(float));
-	const uint32_t meshSize          = static_cast<uint32_t>(m->mNumVertices * streamElementSize + numIndices * sizeof(uint32_t));
-
-	const Mesh result = {
-		.lodCount = 1,
-		.streamCount = 1,
-		.materialID = 0, // we are not yet exporting materials
-		.meshSize = meshSize,
-		.vertexCount = m->mNumVertices,
-		.indexOffset = gIndexOffset,
-		.vertexOffset = gVertexOffset,
-		.lodOffset = {
-			gIndexOffset * sizeof(uint32_t),
-			(gIndexOffset + numIndices) * sizeof(uint32_t)
-		},
-		.streamOffset = {gVertexOffset * streamElementSize},
-		.streamElementSize = {streamElementSize}
-	};
+	const bool hasTexCoords = m->HasTextureCoords(0);
 
 	// for each of the vertices, extract their data from the aiMesh object
 	for (size_t i = 0; i != m->mNumVertices; i++)
 	{
 		const aiVector3D& v = m->mVertices[i];
-		const aiVector3D& t = hasTexCoords ? m->mTextureCoords[0][i] : aiVector3D();
 		const aiVector3D& n = m->mNormals[i];
+		const aiVector3D& t = hasTexCoords ? m->mTextureCoords[0][i] : aiVector3D();
 
-		gMeshData.vertexData.push_back(v.x);
-		gMeshData.vertexData.push_back(v.y);
-		gMeshData.vertexData.push_back(v.z);
+		// apply a global mesh scale, o.w. mesh is too big
+		gMeshData.vertexData.push_back(v.x * gMeshScale);
+		gMeshData.vertexData.push_back(v.y * gMeshScale);
+		gMeshData.vertexData.push_back(v.z * gMeshScale);
 
 		if (gExportTextures)
 		{
-			gMeshData.vertexData.push_back(t.y);
-			gMeshData.vertexData.push_back(t.z);
+			gMeshData.vertexData.push_back(t.x);
+			gMeshData.vertexData.push_back(1.0f - t.y);
 		}
 
 		if (gExportNormals)
@@ -77,11 +60,34 @@ Mesh ConvertAssimpMesh(const aiMesh* m)
 	// for each of the faces, extract indices data
 	for (size_t i = 0; i != m->mNumFaces; i++)
 	{
+		//!? skip if number of indices in this face is not equal to 3!
+		//!? This will solve strange geometry bugs!
+		if (m->mFaces[i].mNumIndices != 3) { continue; }
+
 		const aiFace& f = m->mFaces[i];
 		gMeshData.indexData.push_back(f.mIndices[0] + gVertexOffset);
 		gMeshData.indexData.push_back(f.mIndices[1] + gVertexOffset);
 		gMeshData.indexData.push_back(f.mIndices[2] + gVertexOffset);
 	}
+
+	const uint32_t numElements       = gNumElementsToStore;
+	const uint32_t streamElementSize = static_cast<uint32_t>(numElements * sizeof(float));
+	const uint32_t numIndices        = m->mNumFaces * 3;
+	const uint32_t meshSize          = static_cast<uint32_t>(m->mNumVertices * streamElementSize + numIndices * sizeof(uint32_t));
+
+	const Mesh result = {
+		.lodCount = 1,
+		.streamCount = 1,
+		.materialID = 0, // we are not yet exporting materials
+		.meshSize = meshSize,
+		.vertexCount = m->mNumVertices,
+		.lodOffset = {
+			gIndexOffset * sizeof(uint32_t),
+			(gIndexOffset + numIndices) * sizeof(uint32_t)
+		},
+		.streamOffset = {gVertexOffset * streamElementSize},
+		.streamElementSize = {streamElementSize}
+	};
 
 	// after processing this mesh, increment offset counters for the next mesh
 	gIndexOffset += numIndices;
@@ -149,9 +155,6 @@ int main(int argc, char** argv)
 {
 	argh::parser cmdl(argv);
 
-	bool exportTextures = false;
-	bool exportNormals  = false;
-
 	if (cmdl.size() < 3)
 	{
 		printf("Usage: meshconvert <input> <output> [--export-texcoords | -t] [--export-normals | -n]\n");
@@ -163,16 +166,16 @@ int main(int argc, char** argv)
 
 	if (cmdl[{"-n", "---export-normals"}])
 	{
-		exportNormals = true;
+		gExportNormals = true;
 	}
 
 	if (cmdl[{"-t", "---export-texcoords"}])
 	{
-		exportTextures = true;
+		gExportTextures = true;
 	}
 
-	if (exportTextures) { gNumElementsToStore += 2; }
-	if (exportNormals) { gNumElementsToStore += 3; }
+	if (gExportTextures) { gNumElementsToStore += 2; }
+	if (gExportNormals) { gNumElementsToStore += 3; }
 
 	if (!loadFile(cmdl[1].c_str()))
 	{

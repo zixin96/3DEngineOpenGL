@@ -48,3 +48,50 @@ layout (std140, binding = 0) uniform PerFrameData
 | 02HelloTriangle                                              |                                                              |                                                              |
 | SSAO                                                         |                                                              |                                                              |
 | [Shadow Mapping](https://github.com/zixin96/d3d12book/blob/master/Chapter%2020%20Shadow%20Mapping/Shadows) | ![](https://github.com/zixin96/d3d12book/blob/master/Chapter%2020%20Shadow%20Mapping/Shadows/images/demo.gif) | This demo shows a basic implementation of the shadow mapping algorithm. |
+
+
+
+## Debugging
+
+Nothing shows up on the screen. What happened??? In this case, we forgot to bind the perframe uniform buffer. RenderDoc can help us to that "No Resource" has been bound to PerFrame
+
+1. Use RenderDoc
+2. Use RenderDoc
+3. Use RenderDoc
+
+![image-20220707185714051](images/image-20220707185714051.png)
+
+---
+
+Bug: 
+
+![image-20220707211538159](images/image-20220707211538159.png)
+
+Fix: 
+
+Instead of: 
+
+```c++
+for (size_t i = 0; i != m->mNumFaces; i++)
+{
+    const aiFace& f = m->mFaces[i];
+    gMeshData.indexData.push_back(f.mIndices[0] + gVertexOffset);
+    gMeshData.indexData.push_back(f.mIndices[1] + gVertexOffset);
+    gMeshData.indexData.push_back(f.mIndices[2] + gVertexOffset);
+}
+```
+
+, Do this: 
+
+```c++
+for (size_t i = 0; i != m->mNumFaces; i++)
+{
+    // skip if number of indices in this face is not equal to 3!
+    if (m->mFaces[i].mNumIndices != 3) { continue; }
+    const aiFace& f = m->mFaces[i];
+    gMeshData.indexData.push_back(f.mIndices[0] + gVertexOffset);
+    gMeshData.indexData.push_back(f.mIndices[1] + gVertexOffset);
+    gMeshData.indexData.push_back(f.mIndices[2] + gVertexOffset);
+}
+```
+
