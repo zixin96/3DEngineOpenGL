@@ -9,9 +9,9 @@
 
 #include <stb_image_write.h>
 #include <stb/stb_image.h>
-//#include <gli/gli.hpp>
-//#include <gli/texture2d.hpp>
-//#include <gli/load_ktx.hpp>
+#include <gli/gli.hpp>
+#include <gli/texture2d.hpp>
+#include <gli/load_ktx.hpp>
 
 static int getNumMipMapLevels2D(int w, int h)
 {
@@ -88,16 +88,15 @@ GLTexture::GLTexture(GLenum type, const char* fileName, GLenum clamp)
 				int numMipmaps = 0;
 				if (isKTX)
 				{
-					assert(false);
-					// gli::texture          gliTex = gli::load_ktx(fileName);
-					// gli::gl               GL(gli::gl::PROFILE_KTX);
-					// gli::gl::format const format = GL.translate(gliTex.format(), gliTex.swizzles());
-					// glm::tvec3<GLsizei>   extent(gliTex.extent(0));
-					// w          = extent.x;
-					// h          = extent.y;
-					// numMipmaps = getNumMipMapLevels2D(w, h);
-					// glTextureStorage2D(mHandle, numMipmaps, format.Internal, w, h);
-					// glTextureSubImage2D(mHandle, 0, 0, 0, w, h, format.External, format.Type, gliTex.data(0, 0, 0));
+					gli::texture          gliTex = gli::load_ktx(fileName);
+					gli::gl               GL(gli::gl::PROFILE_KTX);
+					gli::gl::format const format = GL.translate(gliTex.format(), gliTex.swizzles());
+					glm::tvec3<GLsizei>   extent(gliTex.extent(0));
+					w          = extent.x;
+					h          = extent.y;
+					numMipmaps = getNumMipMapLevels2D(w, h);
+					glTextureStorage2D(mHandle, numMipmaps, format.Internal, w, h);
+					glTextureSubImage2D(mHandle, 0, 0, 0, w, h, format.External, format.Type, gliTex.data(0, 0, 0));
 				}
 				else
 				{

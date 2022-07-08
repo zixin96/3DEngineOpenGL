@@ -56,6 +56,12 @@ layout (std140, binding = 0) uniform PerFrameData
 
 
 
+## Credits
+
+- https://github.com/KhronosGroup/glTF-Sample-Viewer/tree/glTF-WebGL-PBR
+- https://github.com/PacktPublishing/3D-Graphics-Rendering-Cookbook
+- https://learnopengl.com/
+
 
 
 ### PVP: Vertex or Vertex and Index Pulling? 
@@ -63,6 +69,14 @@ layout (std140, binding = 0) uniform PerFrameData
 > I’ve also shown that programmable vertex pulling can only be prohibitive from a performance point of view if we are using programmable indexed primitive rendering, as in this case the lack of post-transform vertex cache utilization can dramatically decrease the performance. - OpenGL Insights
 
 Pulling index could be detrimental to performance. 
+
+### ImGui Interaction and Camera
+
+```c++
+gPositioner.update(app.getDeltaSeconds(),
+		                   gMouseState.pos,
+		                   gMouseState.pressedLeft && !io.WantCaptureMouse); // "&& !io.WantCaptureMouse" part prevents camera from moving when we interact with imgui
+```
 
 
 
