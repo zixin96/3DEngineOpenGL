@@ -29,7 +29,7 @@ layout (std140, binding = 0) uniform PerFrameData
 
 ---
 
-
+![image-20220709172604472](images/image-20220709172604472.png)
 
 ## Features
 
@@ -43,7 +43,7 @@ layout (std140, binding = 0) uniform PerFrameData
 - Physically based rendering (PBR) using glTF 2.0 shading model
   - precomputing irradiance maps
   - Bidirectional reflectance distribution function (BRDF) lookup tables (LUTs)
-- A data-oriented (DOD0) scene graph
+- A data-oriented (DOD) scene graph
 
 
 

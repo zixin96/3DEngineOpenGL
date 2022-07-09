@@ -44,7 +44,7 @@ MeshFileHeader loadMeshData(const char* meshFile, MeshData& out)
 	return header;
 }
 
-void saveMeshData(const char* fileName, const MeshData& m)
+void saveMeshesToFile(const char* fileName, const MeshData& m)
 {
 	FILE* f = fopen(fileName, "wb");
 
@@ -63,3 +63,27 @@ void saveMeshData(const char* fileName, const MeshData& m)
 
 	fclose(f);
 }
+
+
+// void recalculateBoundingBoxes(MeshData& m)
+// {
+// 	m.boundingBoxes.clear();
+//
+// 	for (const auto& mesh : m.meshes)
+// 	{
+// 		const auto numIndices = mesh.getLODIndicesCount(0);
+//
+// 		glm::vec3 vmin(std::numeric_limits<float>::max());
+// 		glm::vec3 vmax(std::numeric_limits<float>::lowest());
+//
+// 		for (auto i = 0; i != numIndices; i++)
+// 		{
+// 			auto         vtxOffset = m.indexData[mesh.indexOffset + i] + mesh.vertexOffset;
+// 			const float* vf        = &m.vertexData[vtxOffset * MAX_STREAMS];
+// 			vmin                   = glm::min(vmin, vec3(vf[0], vf[1], vf[2]));
+// 			vmax                   = glm::max(vmax, vec3(vf[0], vf[1], vf[2]));
+// 		}
+//
+// 		m.boundingBoxes.emplace_back(vmin, vmax);
+// 	}
+// }

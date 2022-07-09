@@ -23,7 +23,7 @@ void loadMaterials(const char*                       fileName,
 	FILE* f = fopen(fileName, "rb");
 	if (!f)
 	{
-		printf("Cannot load file %s\nPlease run SceneConverter tool from Chapter7\n", fileName);
+		printf("Cannot load file %s\nPlease run SceneConverter tool\n", fileName);
 		exit(255);
 	}
 

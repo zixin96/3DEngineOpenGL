@@ -1,6 +1,7 @@
 #include <assimp/cimport.h>
 #include <assimp/material.h>
 #include <assimp/GltfMaterial.h>
+#include <assimp/pbrmaterial.h>
 #include <assimp/postprocess.h>
 #include <assimp/scene.h>
 
@@ -13,6 +14,7 @@
 #include <fstream>
 
 #include "meshoptimizer.h"
+
 #include "stb_image_write.h"
 #include "stb_image.h"
 #include "stb_image_resize.h"
@@ -260,10 +262,17 @@ MaterialData convertAIMaterialToMaterialData(const aiMaterial*         M,
 	                         TextureMapMode,
 	                         &TextureFlags) == AI_SUCCESS)
 	{
+		const std::string albedoMap = std::string(Path.C_Str());
+		const std::string debugMetal = "RollDoor";
+
+		if (albedoMap.find(debugMetal) != std::string::npos)
+		{
+			printf("Stop!");
+		}
+
 		D.albedoMap = addUnique(files, Path.C_Str());
 
-		const std::string albedoMap = std::string(Path.C_Str());
-
+		
 		if (albedoMap.find("grey_30") != albedoMap.npos)
 		{
 			D.flags |= sMaterialFlags_Transparent;
@@ -582,51 +591,70 @@ void printMat4(const aiMatrix4x4& m)
 	}
 }
 
-void processLods(std::vector<uint32_t>& indices, std::vector<float>& vertices, std::vector<std::vector<uint32_t>>& outLods)
+void processLods(std::vector<uint32_t>&              indices,
+                 std::vector<float>&                 vertices,
+                 std::vector<std::vector<uint32_t>>& outLods)
 {
-	size_t verticesCountIn    = vertices.size() / 2;
+	// since each vertex has 3 float values, we can compute the total # of vertices here: 
+	size_t verticesCountIn = vertices.size() / 3; //? Book says "/ 2".
+
 	size_t targetIndicesCount = indices.size();
 
+	// the first LOD corresponds to the original mesh indices
 	uint8_t LOD = 1;
 
 	printf("\n   LOD0: %i indices", int(indices.size()));
 
 	outLods.push_back(indices);
 
+	// iterate until the number of indices in the last LOD drops below 1024,
+	// or the total # number of generated LODs reaches 8
 	while (targetIndicesCount > 1024 && LOD < 8)
 	{
+		// each subsequent LOD should have half of the # of indices from the previous LOD
 		targetIndicesCount = indices.size() / 2;
 
 		bool sloppy = false;
 
-		size_t numOptIndices = meshopt_simplify(
+		// try non-sloppy simplification first
+		size_t numOptIndices = meshopt_simplify(indices.data(),
 		                                        indices.data(),
-		                                        indices.data(), (uint32_t)indices.size(),
-		                                        vertices.data(), verticesCountIn,
+		                                        (uint32_t)indices.size(),
+		                                        vertices.data(),
+		                                        verticesCountIn,
 		                                        sizeof(float) * 3,
-		                                        targetIndicesCount, 0.02f);
+		                                        targetIndicesCount,
+		                                        0.02f); // allow the algorithm to have 2% deviation from the original mesh
 
-		// cannot simplify further
+		// if the above algorithm is unable to achieve at least a 10% reduction, we will switch to sloppy simplification
 		if (static_cast<size_t>(numOptIndices * 1.1f) > indices.size())
 		{
 			if (LOD > 1)
 			{
 				// try harder
-				numOptIndices = meshopt_simplifySloppy(
+				numOptIndices = meshopt_simplifySloppy(indices.data(),
 				                                       indices.data(),
-				                                       indices.data(), indices.size(),
-				                                       vertices.data(), verticesCountIn,
+				                                       indices.size(),
+				                                       vertices.data(),
+				                                       verticesCountIn,
 				                                       sizeof(float) * 3,
-				                                       targetIndicesCount, 0.02f, nullptr);
+				                                       targetIndicesCount,
+				                                       0.02f);
 				sloppy = true;
-				if (numOptIndices == indices.size()) break;
+
+				// give up and terminate the sequence if the sloppy ver. doesn't simplify further
+				if (numOptIndices == indices.size()) { break; }
 			}
 			else
+			{
+				// if the first sequence doesn't achieve the desired LOD count, give up and terminate the sequence
 				break;
+			}
 		}
 
 		indices.resize(numOptIndices);
 
+		// reorder indices for vertex cache
 		meshopt_optimizeVertexCache(indices.data(), indices.data(), indices.size(), verticesCountIn);
 
 		printf("\n   LOD%i: %i indices %s", int(LOD), int(numOptIndices), sloppy ? "[sloppy]" : "");
@@ -637,7 +665,7 @@ void processLods(std::vector<uint32_t>& indices, std::vector<float>& vertices, s
 	}
 }
 
-Mesh convertAIMesh(const aiMesh* m, const SceneConfig& cfg)
+Mesh ConvertAssimpMesh(const aiMesh* m, const SceneConfig& cfg)
 {
 	const bool     hasTexCoords      = m->HasTextureCoords(0);
 	const uint32_t streamElementSize = static_cast<uint32_t>(gNumElementsToStore * sizeof(float));
@@ -686,16 +714,24 @@ Mesh convertAIMesh(const aiMesh* m, const SceneConfig& cfg)
 
 	for (size_t i = 0; i != m->mNumFaces; i++)
 	{
-		if (m->mFaces[i].mNumIndices != 3)
-			continue;
+		//!? skip if number of indices in this face is not equal to 3!
+		//!? This will solve strange geometry bugs!
+		if (m->mFaces[i].mNumIndices != 3) { continue; }
+
 		for (unsigned j = 0; j != m->mFaces[i].mNumIndices; j++)
+		{
 			srcIndices.push_back(m->mFaces[i].mIndices[j]);
+		}
 	}
 
 	if (!cfg.calculateLODs)
+	{
 		outLods.push_back(srcIndices);
+	}
 	else
+	{
 		processLods(srcIndices, srcVertices, outLods);
+	}
 
 	printf("\nCalculated LOD count: %u\n", (unsigned)outLods.size());
 
@@ -704,7 +740,9 @@ Mesh convertAIMesh(const aiMesh* m, const SceneConfig& cfg)
 	for (size_t l = 0; l < outLods.size(); l++)
 	{
 		for (size_t i = 0; i < outLods[l].size(); i++)
+		{
 			gMeshData.indexData.push_back(outLods[l][i]);
+		}
 
 		result.lodOffset[l] = numIndices;
 		numIndices += (int)outLods[l].size();
@@ -719,10 +757,23 @@ Mesh convertAIMesh(const aiMesh* m, const SceneConfig& cfg)
 	return result;
 }
 
+void dumpMaterial(const std::vector<std::string>& files, const MaterialData& d)
+{
+	printf("files: %d\n", (int)files.size());
+	printf("maps: %u/%u/%u/%u/%u\n", (uint32_t)d.albedoMap, (uint32_t)d.ambientOcclusionMap, (uint32_t)d.emissiveMap, (uint32_t)d.opacityMap, (uint32_t)d.metallicRoughnessMap);
+	printf(" albedo:    %s\n", (d.albedoMap < 0xFFFF) ? files[d.albedoMap].c_str() : "");
+	printf(" occlusion: %s\n", (d.ambientOcclusionMap < 0xFFFF) ? files[d.ambientOcclusionMap].c_str() : "");
+	printf(" emission:  %s\n", (d.emissiveMap < 0xFFFF) ? files[d.emissiveMap].c_str() : "");
+	printf(" opacity:   %s\n", (d.opacityMap < 0xFFFF) ? files[d.opacityMap].c_str() : "");
+	printf(" MeR:       %s\n", (d.metallicRoughnessMap < 0xFFFF) ? files[d.metallicRoughnessMap].c_str() : "");
+	printf(" Normal:    %s\n", (d.normalMap < 0xFFFF) ? files[d.normalMap].c_str() : "");
+}
+
 void processScene(const SceneConfig& cfg)
 {
 	// clear mesh data from previous scene
 	gMeshData.meshes.clear();
+	// gMeshData.boundingBoxes.clear();
 	gMeshData.indexData.clear();
 	gMeshData.vertexData.clear();
 
@@ -730,13 +781,15 @@ void processScene(const SceneConfig& cfg)
 	gVertexOffset = 0;
 
 	// extract base model path
-	const std::size_t pathSeparator = cfg.fileName.find_last_of("/\\");
+	const std::size_t pathSeparator = cfg.fileName.find_last_of("/\\"); // "/\\" means forward (/) or backward slash (\\)
 	const std::string basePath      = (pathSeparator != std::string::npos) ? cfg.fileName.substr(0, pathSeparator + 1) : std::string();
 
+	// specify desired flags for ASSIMP to process
+	// we do not want to flatten the transformation hierarchies (no aiProcess_PreTransformVertices)
 	const unsigned int flags = 0 |
 	                           aiProcess_JoinIdenticalVertices |
 	                           aiProcess_Triangulate |
-	                           aiProcess_GenSmoothNormals |
+	                           aiProcess_GenSmoothNormals | // normal vectors should be generated for those meshes that do not contain them
 	                           aiProcess_LimitBoneWeights |
 	                           aiProcess_SplitLargeMeshes |
 	                           aiProcess_ImproveCacheLocality |
@@ -755,21 +808,24 @@ void processScene(const SceneConfig& cfg)
 		exit(EXIT_FAILURE);
 	}
 
-	// 1. Mesh conversion as in Chapter 5
+	// Mesh conversion 
 	gMeshData.meshes.reserve(scene->mNumMeshes);
+	// gMeshData.boundingBoxes.reserve(scene->mNumMeshes);
 
 	for (unsigned int i = 0; i != scene->mNumMeshes; i++)
 	{
 		printf("\nConverting meshes %u/%u...", i + 1, scene->mNumMeshes);
-		Mesh mesh = convertAIMesh(scene->mMeshes[i], cfg);
+		Mesh mesh = ConvertAssimpMesh(scene->mMeshes[i], cfg);
 		gMeshData.meshes.push_back(mesh);
 	}
 
-	saveMeshData(cfg.outputMesh.c_str(), gMeshData);
+	// recalculateBoundingBoxes(gMeshData);
+
+	saveMeshesToFile(cfg.outputMesh.c_str(), gMeshData);
 
 	Scene ourScene;
 
-	// 2. Material conversion
+	// Material conversion
 	std::vector<MaterialData> materials;
 	std::vector<std::string>& materialNames = ourScene.materialNames;
 
@@ -785,19 +841,72 @@ void processScene(const SceneConfig& cfg)
 
 		MaterialData D = convertAIMaterialToMaterialData(mm, files, opacityMaps);
 		materials.push_back(D);
-		//dumpMaterial(files, D);
+		// dumpMaterial(files, D);
 	}
 
-	// 3. Texture processing, rescaling and packing
+	// Texture processing, rescaling and packing
 	convertAndDownscaleAllTextures(materials, basePath, files, opacityMaps);
 
 	saveMaterials(cfg.outputMaterials.c_str(), materials, files);
 
-	// 4. Scene hierarchy conversion
+	// Scene hierarchy conversion
 	traverse(scene, ourScene, scene->mRootNode, -1, 0);
 
 	saveScene(cfg.outputScene.c_str(), ourScene);
 }
+
+/** Chapter9: Merge meshes (interior/exterior) */
+// void mergeBistro()
+// {
+// 	Scene scene1, scene2;
+// 	std::vector<Scene*> scenes = { &scene1, &scene2 };
+//
+// 	MeshData m1, m2;
+// 	MeshFileHeader header1 = loadMeshData("data/meshes/test.meshes", m1);
+// 	MeshFileHeader header2 = loadMeshData("data/meshes/test2.meshes", m2);
+//
+// 	std::vector<uint32_t> meshCounts = { header1.meshCount, header2.meshCount };
+//
+// 	loadScene("data/meshes/test.scene", scene1);
+// 	loadScene("data/meshes/test2.scene", scene2);
+//
+// 	Scene scene;
+// 	mergeScenes(scene, scenes, {}, meshCounts);
+//
+// 	MeshData meshData;
+// 	std::vector<MeshData*> meshDatas = { &m1, &m2 };
+//
+// 	MeshFileHeader header = mergeMeshData(meshData, meshDatas);
+//
+// 	// now the material lists:
+// 	std::vector<MaterialDescription> materials1, materials2;
+// 	std::vector<std::string> textureFiles1, textureFiles2;
+// 	loadMaterials("data/meshes/test.materials", materials1, textureFiles1);
+// 	loadMaterials("data/meshes/test2.materials", materials2, textureFiles2);
+//
+// 	std::vector<MaterialDescription> allMaterials;
+// 	std::vector<std::string> allTextures;
+//
+// 	mergeMaterialLists(
+// 		{ &materials1, &materials2 },
+// 		{ &textureFiles1, &textureFiles2 },
+// 		allMaterials, allTextures);
+//
+// 	saveMaterials("data/meshes/bistro_all.materials", allMaterials, allTextures);
+//
+// 	printf("[Unmerged] scene items: %d\n", (int)scene.hierarchy_.size());
+// 	mergeScene(scene, meshData, "Foliage_Linde_Tree_Large_Orange_Leaves");
+// 	printf("[Merged orange leaves] scene items: %d\n", (int)scene.hierarchy_.size());
+// 	mergeScene(scene, meshData, "Foliage_Linde_Tree_Large_Green_Leaves");
+// 	printf("[Merged green leaves]  scene items: %d\n", (int)scene.hierarchy_.size());
+// 	mergeScene(scene, meshData, "Foliage_Linde_Tree_Large_Trunk");
+// 	printf("[Merged trunk]  scene items: %d\n", (int)scene.hierarchy_.size());
+//
+// 	recalculateBoundingBoxes(meshData);
+//
+// 	saveMeshData("data/meshes/bistro_all.meshes", meshData);
+// 	saveScene("data/meshes/bistro_all.scene", scene);
+// }
 
 int main()
 {
@@ -809,6 +918,9 @@ int main()
 	{
 		processScene(cfg);
 	}
+
+	// Final step: optimize bistro scene
+	// mergeBistro();
 
 	return 0;
 }

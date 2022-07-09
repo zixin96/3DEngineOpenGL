@@ -1,20 +1,20 @@
 [
 	{
-		"input_scene": "deps/src/bistro/Exterior/exterior.obj",
-		"output_mesh": "data/meshes/test.meshes",
-		"output_scene": "data/meshes/test.scene",
-		"output_materials": "data/meshes/test.materials",
+		"input_scene": "vendor/src/bistro/Exterior/exterior.obj",
+		"output_mesh": "data/meshes/bistro_exterior.meshes",
+		"output_scene": "data/meshes/bistro_exterior.scene",
+		"output_materials": "data/meshes/bistro_exterior.materials",
 		"scale": 0.01,
 		"calculate_LODs": false,
-		"merge_instances": true
+		"merge_instances": false
 	},
 	{
-		"input_scene": "deps/src/bistro/Interior/interior.obj",
-		"output_mesh": "data/meshes/test2.meshes",
-		"output_scene": "data/meshes/test2.scene",
-		"output_materials": "data/meshes/test2.materials",
+		"input_scene": "vendor/src/bistro/Interior/interior.obj",
+		"output_mesh": "data/meshes/bistro_interior.meshes",
+		"output_scene": "data/meshes/bistro_interior.scene",
+		"output_materials": "data/meshes/bistro_interior.materials",
 		"scale": 0.01,
 		"calculate_LODs": false,
-		"merge_instances": true
+		"merge_instances": false
 	}
 ]
