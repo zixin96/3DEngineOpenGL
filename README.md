@@ -29,7 +29,7 @@ layout (std140, binding = 0) uniform PerFrameData
 
 ---
 
-![image-20220709172604472](images/image-20220709172604472.png)
+
 
 ## Features
 
@@ -143,3 +143,44 @@ struct VertexData
 Fix:
 
 ![image-20220708142754600](images/image-20220708142754600.png)
+
+---
+
+Bug: A particular material "Metal_RollDoor" has the wrong file and directory name causing the following directory iterator returns "directory not found" error. 
+
+```c++
+std::string findSubstitute(const std::string& origFile)
+{
+...
+	for (auto& p : fs::directory_iterator(dir)) // dir not found
+...
+}
+```
+
+Fix: Remove extra spaces in the `.mtl` file
+
+How to track this bug: 
+
+```c++
+if (aiGetMaterialTexture(M,
+                         aiTextureType_DIFFUSE,
+                         0,
+                         &Path,
+                         &Mapping,
+                         &UVIndex,
+                         &Blend,
+                         &TextureOp,
+                         TextureMapMode,
+                         &TextureFlags) == AI_SUCCESS)
+{
+    const std::string albedoMap  = std::string(Path.C_Str());
+    const std::string debugMetal = "RollDoor";
+
+    if (albedoMap.find(debugMetal) != std::string::npos)
+    {
+        printf("Stop!"); // set break point here to see the Path is actually wrong, and this is the first time Path has been set, so the issue must be in the source file (.obj)
+    }
+...
+}
+```
+

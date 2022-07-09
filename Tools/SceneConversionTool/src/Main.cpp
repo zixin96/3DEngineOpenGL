@@ -1,7 +1,6 @@
 #include <assimp/cimport.h>
 #include <assimp/material.h>
 #include <assimp/GltfMaterial.h>
-#include <assimp/pbrmaterial.h>
 #include <assimp/postprocess.h>
 #include <assimp/scene.h>
 
@@ -263,16 +262,8 @@ MaterialData convertAIMaterialToMaterialData(const aiMaterial*         M,
 	                         &TextureFlags) == AI_SUCCESS)
 	{
 		const std::string albedoMap = std::string(Path.C_Str());
-		const std::string debugMetal = "RollDoor";
+		D.albedoMap                 = addUnique(files, Path.C_Str());
 
-		if (albedoMap.find(debugMetal) != std::string::npos)
-		{
-			printf("Stop!");
-		}
-
-		D.albedoMap = addUnique(files, Path.C_Str());
-
-		
 		if (albedoMap.find("grey_30") != albedoMap.npos)
 		{
 			D.flags |= sMaterialFlags_Transparent;
