@@ -1,0 +1,20 @@
+[
+	{
+		"input_scene": "deps/src/bistro/Exterior/exterior.obj",
+		"output_mesh": "data/meshes/test.meshes",
+		"output_scene": "data/meshes/test.scene",
+		"output_materials": "data/meshes/test.materials",
+		"scale": 0.01,
+		"calculate_LODs": false,
+		"merge_instances": true
+	},
+	{
+		"input_scene": "deps/src/bistro/Interior/interior.obj",
+		"output_mesh": "data/meshes/test2.meshes",
+		"output_scene": "data/meshes/test2.scene",
+		"output_materials": "data/meshes/test2.materials",
+		"scale": 0.01,
+		"calculate_LODs": false,
+		"merge_instances": true
+	}
+]

@@ -61,3 +61,4 @@ struct MeshData
 };
 
 MeshFileHeader loadMeshData(const char* meshFile, MeshData& out);
+void           saveMeshData(const char* fileName, const MeshData& m);

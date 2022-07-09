@@ -35,6 +35,7 @@ layout (std140, binding = 0) uniform PerFrameData
 
 - Direct-State-Access (DSA) programming model
 - Programmable vertex pulling (PVP) data storage approach
+- `ARB_bindless_texture`
 - HDR Cube map: 6 faces or equirectangular format or vertical/horizontal cross
 - Custom mesh preprocessing pipeline 
 - Real-time discrete LOD algorithms
@@ -42,6 +43,7 @@ layout (std140, binding = 0) uniform PerFrameData
 - Physically based rendering (PBR) using glTF 2.0 shading model
   - precomputing irradiance maps
   - Bidirectional reflectance distribution function (BRDF) lookup tables (LUTs)
+- A data-oriented (DOD0) scene graph
 
 
 

@@ -43,3 +43,23 @@ MeshFileHeader loadMeshData(const char* meshFile, MeshData& out)
 
 	return header;
 }
+
+void saveMeshData(const char* fileName, const MeshData& m)
+{
+	FILE* f = fopen(fileName, "wb");
+
+	const MeshFileHeader header = {
+		.magicValue = 0x12345678,
+		.meshCount = (uint32_t)m.meshes.size(),
+		.dataBlockStartOffset = (uint32_t)(sizeof(MeshFileHeader) + m.meshes.size() * sizeof(Mesh)),
+		.indexDataSize = (uint32_t)(m.indexData.size() * sizeof(uint32_t)),
+		.vertexDataSize = (uint32_t)(m.vertexData.size() * sizeof(float))
+	};
+
+	fwrite(&header, 1, sizeof(header), f);
+	fwrite(m.meshes.data(), sizeof(Mesh), header.meshCount, f);
+	fwrite(m.indexData.data(), 1, header.indexDataSize, f);
+	fwrite(m.vertexData.data(), 1, header.vertexDataSize, f);
+
+	fclose(f);
+}
