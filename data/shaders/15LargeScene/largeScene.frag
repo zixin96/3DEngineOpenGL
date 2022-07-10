@@ -1,4 +1,4 @@
-﻿#version 460 core
+#version 460 core
 
 #extension GL_ARB_bindless_texture : require
 #extension GL_ARB_gpu_shader_int64 : enable
@@ -42,11 +42,22 @@ void main()
 	// Handles as intergers, https://www.khronos.org/opengl/wiki/Bindless_Texture
 	// unpackUint2x32, https://www.khronos.org/registry/OpenGL/extensions/ARB/ARB_gpu_shader_int64.txt
 
+	 // uint64_t values can be converted to any sampler or image type using constructors: sampler2DArray(some_uint64)
+	 // Thus, I delete the code to convert it to uvec2 
+
 	// fetch albedo
 	if (mtl.albedoMap > 0)
-		albedo = texture( sampler2D(unpackUint2x32(mtl.albedoMap)), v_tc); 
+	{
+		// albedo = texture( sampler2D(unpackUint2x32(mtl.albedoMap)), v_tc); 
+		albedo = texture( sampler2D(mtl.albedoMap), v_tc); 
+	}
+		
 	if (mtl.normalMap > 0)
-		normalSample = texture( sampler2D(unpackUint2x32(mtl.normalMap)), v_tc).xyz;
+	{
+		// normalSample = texture( sampler2D(unpackUint2x32(mtl.normalMap)), v_tc).xyz;
+		normalSample = texture( sampler2D(mtl.normalMap), v_tc).xyz;
+	}
+		
 
 	runAlphaTest(albedo.a, mtl.alphaTest);
 
