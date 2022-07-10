@@ -38,9 +38,13 @@ void main()
 	vec4 albedo = mtl.albedoColor;
 	vec3 normalSample = vec3(0.0, 0.0, 0.0);
 
+	// Sampling Bindless Textures, page 340, OpenGL Red Book
+	// Handles as intergers, https://www.khronos.org/opengl/wiki/Bindless_Texture
+	// unpackUint2x32, https://www.khronos.org/registry/OpenGL/extensions/ARB/ARB_gpu_shader_int64.txt
+
 	// fetch albedo
 	if (mtl.albedoMap > 0)
-		albedo = texture( sampler2D(unpackUint2x32(mtl.albedoMap)), v_tc);
+		albedo = texture( sampler2D(unpackUint2x32(mtl.albedoMap)), v_tc); 
 	if (mtl.normalMap > 0)
 		normalSample = texture( sampler2D(unpackUint2x32(mtl.normalMap)), v_tc).xyz;
 

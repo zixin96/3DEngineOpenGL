@@ -74,11 +74,18 @@ void GLMesh::draw(const GLSceneData& data) const
 	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, kBufferIndex_ModelMatrices, mBufferModelMatrices.getHandle());
 	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, kBufferIndex_Materials, mBufferMaterials.getHandle());
 
+	// https://www.khronos.org/registry/OpenGL/specs/gl/glspec46.core.pdf
+
 	// upload the command container
 	glBindBuffer(GL_DRAW_INDIRECT_BUFFER, mBufferIndirect.getHandle());
 	glBindBuffer(GL_PARAMETER_BUFFER, mBufferIndirect.getHandle());
 
-	glMultiDrawElementsIndirectCount(GL_TRIANGLES, GL_UNSIGNED_INT, (const void*)sizeof(GLsizei), 0, (GLsizei)data.mShapes.size(), 0);
+	glMultiDrawElementsIndirectCount(GL_TRIANGLES,
+	                                 GL_UNSIGNED_INT,
+	                                 (const void*)sizeof(GLsizei), // ("where to find the draw commands?) an offset of the first element of the array (containing the draw commands) within the buffer currently bound to GL_DRAW_INDIRECT_BUFFER buffer binding
+	                                 0,                            // ("where to find the draw count?) an offset in bytes into the buffer object bound to GL_PARAMETER_BUFFER binding point at which a single sizei typed value is stored, which contains the draw count. 
+	                                 (GLsizei)data.mShapes.size(), // the maximum number of draws that are expected to be stored in the buffer
+	                                 0);                           // the array elements is tightly packed
 }
 
 GLMesh::~GLMesh()

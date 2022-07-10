@@ -35,5 +35,5 @@ void main()
 	v_worldPos = (view * vec4(in_Vertex, 1.0)).xyz;
 	v_worldNormal = transpose(inverse(mat3(model))) * in_Normal;
 	v_tc = in_TexCoord;
-	matIdx = gl_BaseInstance;
+	matIdx = gl_BaseInstance; // DrawElementsIndirectCommand::baseInstance
 }

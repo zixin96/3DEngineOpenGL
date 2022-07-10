@@ -96,7 +96,6 @@ int main()
 
 	gPositioner.mMaxSpeed = 1.0f;
 
-
 	while (!glfwWindowShouldClose(app.getWindow()))
 	{
 		gPositioner.update(app.getDeltaSeconds(), gMouseState.pos, gMouseState.pressedLeft);

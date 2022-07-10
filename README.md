@@ -35,7 +35,9 @@ layout (std140, binding = 0) uniform PerFrameData
 
 - Direct-State-Access (DSA) programming model
 - Programmable vertex pulling (PVP) data storage approach
-- `ARB_bindless_texture`, `ARB_multi_draw_indirect` (MDI), `ARB_indirect_
+- `ARB_bindless_texture`, `ARB_multi_draw_indirect` (MDI), `ARB_indirect_parameters`
+  - `glMultiDrawElementsIndirect`
+
 - HDR Cube map: 6 faces or equirectangular format or vertical/horizontal cross
 - Custom mesh preprocessing pipeline 
 - Real-time discrete LOD algorithms
@@ -63,6 +65,7 @@ layout (std140, binding = 0) uniform PerFrameData
 - https://github.com/KhronosGroup/glTF-Sample-Viewer/tree/glTF-WebGL-PBR
 - https://github.com/PacktPublishing/3D-Graphics-Rendering-Cookbook
 - https://learnopengl.com/
+- http://www.opengl-redbook.com/
 
 
 
