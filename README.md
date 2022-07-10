@@ -6,8 +6,6 @@ Before testing out the final model, remember to apply the patch.
 
 Copy `vendor/src/bistro/PatchedMaterials/XXX.mtl` into `vendor/src/bistro/Exterior/XXX.mtl` and `vendor/src/bistro/Interior/XXX.mtl`. Overwrite if necessary (to fix the materials)
 
-
-
 `cmake -S . -B ./build/Win64 -G "Visual Studio 17 2022" -A x64`
 
 ## Points of Interest
@@ -37,15 +35,22 @@ layout (std140, binding = 0) uniform PerFrameData
 - Programmable vertex pulling (PVP) data storage approach
 - `ARB_bindless_texture`, `ARB_multi_draw_indirect` (MDI), `ARB_indirect_parameters`
   - `glMultiDrawElementsIndirect`
-
 - HDR Cube map: 6 faces or equirectangular format or vertical/horizontal cross
 - Custom mesh preprocessing pipeline 
 - Real-time discrete LOD algorithms
-- Dynamic LOD based on tessellation
+  - Dynamic LOD based on tessellation shaders
 - Physically based rendering (PBR) using glTF 2.0 shading model
   - precomputing irradiance maps
   - Bidirectional reflectance distribution function (BRDF) lookup tables (LUTs)
 - A data-oriented (DOD) scene graph
+- Shadow mapping with percentage-closer filtering (PCF)
+- Postprocessing pipeline
+  - SSAO
+  - HDR rendering and tone mapping
+  - HDR Light Adaptation
+  - TAA 
+- Offscreen rendering
+- fullscreen quad rendering
 
 
 

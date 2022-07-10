@@ -108,6 +108,7 @@ add_subdirectory(Samples/12MeshRenderer)
 add_subdirectory(Samples/13Tessellation)
 add_subdirectory(Samples/14PBR)
 add_subdirectory(Samples/15LargeScene)
+add_subdirectory(Samples/16ShadowMapping)
 
 add_subdirectory(Tools/MeshConversionTool)
 add_subdirectory(Tools/SceneConversionTool)

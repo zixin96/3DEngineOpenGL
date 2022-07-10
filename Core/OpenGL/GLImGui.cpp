@@ -103,7 +103,7 @@ void GLImGui::defaultInitImGui()
 	ImFontConfig cfg         = ImFontConfig();
 	cfg.FontDataOwnedByAtlas = false;
 	cfg.RasterizerMultiply   = 1.5f;
-	cfg.SizePixels           = 1000.0f / 32.0f; // TODO: may need to change this if text doesn't look right
+	cfg.SizePixels           = 512 / 32.0f; // TODO: may need to change this if text doesn't look right
 	cfg.PixelSnapH           = true;
 	cfg.OversampleH          = 4;
 	cfg.OversampleV          = 4;
@@ -159,6 +159,7 @@ int renderSceneTree(const Scene& scene, int node)
 	return selected;
 }
 
+// renders the contents of an OpenGL texture in a separate imgui window
 void imguiTextureWindowGL(const char* title, uint32_t texId)
 {
 	ImGui::Begin(title, nullptr);
