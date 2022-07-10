@@ -61,3 +61,5 @@ void saveStringList(FILE* f, const std::vector<std::string>& lines);
 
 void markAsChanged(Scene& scene, int node);
 void recalculateGlobalTransforms(Scene& scene);
+
+std::string getNodeName(const Scene& scene, int node);

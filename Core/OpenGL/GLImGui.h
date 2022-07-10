@@ -9,6 +9,7 @@
 #include "GLProgram.h"
 #include "GLShader.h"
 
+#include "Util/Scene.h"
 
 class GLImGui
 {
@@ -68,3 +69,6 @@ private:
 	GLProgram mProgram            = GLProgram(mVertexShader, mFragmentShader);
 	GLBuffer  mPerFrameDataBuffer = GLBuffer(sizeof(glm::mat4), nullptr, GL_DYNAMIC_STORAGE_BIT);
 };
+
+int  renderSceneTree(const Scene& scene, int node);
+void imguiTextureWindowGL(const char* title, uint32_t texId);

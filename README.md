@@ -69,6 +69,10 @@ layout (std140, binding = 0) uniform PerFrameData
 
 
 
+## TODO
+
+- implement scene graph based on VK_scenegraph
+
 ### PVP: Vertex or Vertex and Index Pulling? 
 
 > I’ve also shown that programmable vertex pulling can only be prohibitive from a performance point of view if we are using programmable indexed primitive rendering, as in this case the lack of post-transform vertex cache utilization can dramatically decrease the performance. - OpenGL Insights

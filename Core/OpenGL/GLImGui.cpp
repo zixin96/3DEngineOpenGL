@@ -1,5 +1,7 @@
 #include "GLImGui.h"
 
+#include <string>
+
 GLImGui::GLImGui()
 {
 	glCreateVertexArrays(1, &mVAO);
@@ -122,4 +124,53 @@ void GLImGui::defaultInitImGui()
 	io.Fonts->TexID            = (ImTextureID)(intptr_t)mTexture;
 	io.FontDefault             = Font;
 	io.DisplayFramebufferScale = ImVec2(1, 1);
+}
+
+int renderSceneTree(const Scene& scene, int node)
+{
+	int         selected = -1;
+	std::string name     = getNodeName(scene, node);
+	std::string label    = name.empty() ? (std::string("Node") + std::to_string(node)) : name;
+
+	const int flags = (scene.hierarchy[node].firstChild < 0) ? ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_Bullet : 0;
+
+	const bool opened = ImGui::TreeNodeEx(&scene.hierarchy[node], flags, "%s", label.c_str());
+
+	ImGui::PushID(node);
+
+	if (ImGui::IsItemClicked(0))
+	{
+		printf("Selected node: %d (%s)\n", node, label.c_str());
+		selected = node;
+	}
+
+	if (opened)
+	{
+		for (int ch = scene.hierarchy[node].firstChild; ch != -1; ch = scene.hierarchy[ch].nextSibling)
+		{
+			int subNode = renderSceneTree(scene, ch);
+			if (subNode > -1)
+				selected = subNode;
+		}
+		ImGui::TreePop();
+	}
+
+	ImGui::PopID();
+	return selected;
+}
+
+void imguiTextureWindowGL(const char* title, uint32_t texId)
+{
+	ImGui::Begin(title, nullptr);
+
+	const ImVec2 vMin = ImGui::GetWindowContentRegionMin();
+	const ImVec2 vMax = ImGui::GetWindowContentRegionMax();
+
+	ImGui::Image(
+	             (void*)(intptr_t)texId,
+	             ImVec2(vMax.x - vMin.x, vMax.y - vMin.y),
+	             ImVec2(0.0f, 1.0f), ImVec2(1.0f, 0.0f)
+	            );
+
+	ImGui::End();
 }

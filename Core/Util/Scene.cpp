@@ -1,5 +1,11 @@
 #include "Scene.h"
 
+std::string getNodeName(const Scene& scene, int node)
+{
+	int strID = scene.nodeIDToNameID.contains(node) ? scene.nodeIDToNameID.at(node) : -1;
+	return (strID > -1) ? scene.names[strID] : std::string();
+}
+
 int addNode(Scene& scene, int parent, int level)
 {
 	// the current size of hierarchy array is the new node's ID
