@@ -1,31 +1,39 @@
 #pragma once
 #include "GLBuffer.h"
+#include "GLSceneData.h"
 #include "Util/VtxData.h"
 
-// struct DrawElementsIndirectCommand
-// {
-// 	GLuint count_;
-// 	GLuint instanceCount_;
-// 	GLuint firstIndex_;
-// 	GLuint baseVertex_;
-// 	GLuint baseInstance_;
-// };
+// describes a single draw command
+struct DrawElementsIndirectCommand
+{
+	GLuint count;
+	GLuint instanceCount;
+	GLuint firstIndex;
+	GLuint baseVertex;
+	GLuint baseInstance;
+};
 
-class GLMesh
+class GLMesh final
 {
 public:
-	GLMesh(const MeshFileHeader& header, const Mesh* meshes, const uint32_t* indices, const float* vertexData);
-	void draw(const MeshFileHeader& header) const;
+	explicit GLMesh(const GLSceneData& data);
+
+	void draw(const GLSceneData& data) const;
+
 	~GLMesh();
 
-	GLMesh(const GLMesh&) = delete;
-	GLMesh(GLMesh&&)      = default;
+	GLMesh(const GLMesh&);
+	GLMesh(GLMesh&&);
 
 private:
-	GLuint   mVAO;
+	GLuint   mVao;
 	uint32_t mNumIndices;
 
-	GLBuffer mIndexBuffer;
-	GLBuffer mVertexBuffer;
-	// GLBuffer mIndirectCommandBuffer;
+	GLBuffer mBufferIndices;
+	GLBuffer mBufferVertices;
+	GLBuffer mBufferMaterials;
+
+	GLBuffer mBufferIndirect;
+
+	GLBuffer mBufferModelMatrices;
 };

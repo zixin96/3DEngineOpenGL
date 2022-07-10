@@ -85,12 +85,22 @@ struct MeshFileHeader
 	uint32_t vertexDataSize;
 };
 
+struct DrawData
+{
+	uint32_t meshIndex;
+	uint32_t materialIndex;
+	uint32_t LOD;
+	uint32_t indexOffset;
+	uint32_t vertexOffset;
+	uint32_t transformIndex;
+};
+
 struct MeshData
 {
 	std::vector<Mesh> meshes;
 	// note: you could combine index and vertex data into a single large byte buffer
-	std::vector<uint32_t>    indexData;
-	std::vector<float>       vertexData;
+	std::vector<uint32_t> indexData;
+	std::vector<float>    vertexData;
 	// std::vector<BoundingBox> boundingBoxes;
 };
 

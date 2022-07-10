@@ -35,7 +35,7 @@ layout (std140, binding = 0) uniform PerFrameData
 
 - Direct-State-Access (DSA) programming model
 - Programmable vertex pulling (PVP) data storage approach
-- `ARB_bindless_texture`
+- `ARB_bindless_texture`, `ARB_multi_draw_indirect` (MDI), `ARB_indirect_
 - HDR Cube map: 6 faces or equirectangular format or vertical/horizontal cross
 - Custom mesh preprocessing pipeline 
 - Real-time discrete LOD algorithms

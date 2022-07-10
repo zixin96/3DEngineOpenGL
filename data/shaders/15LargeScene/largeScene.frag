@@ -3,7 +3,7 @@
 #extension GL_ARB_bindless_texture : require
 #extension GL_ARB_gpu_shader_int64 : enable
 
-#include <data/shaders/15LargeScene/materia.glsl>
+#include <data/shaders/15LargeScene/material.glsl>
 
 layout(std140, binding = 0) uniform PerFrameData
 {
@@ -35,16 +35,16 @@ void main()
 {
 	MaterialData mtl = in_Materials[matIdx];
 
-	vec4 albedo = mtl.albedoColor_;
+	vec4 albedo = mtl.albedoColor;
 	vec3 normalSample = vec3(0.0, 0.0, 0.0);
 
 	// fetch albedo
-	if (mtl.albedoMap_ > 0)
-		albedo = texture( sampler2D(unpackUint2x32(mtl.albedoMap_)), v_tc);
-	if (mtl.normalMap_ > 0)
-		normalSample = texture( sampler2D(unpackUint2x32(mtl.normalMap_)), v_tc).xyz;
+	if (mtl.albedoMap > 0)
+		albedo = texture( sampler2D(unpackUint2x32(mtl.albedoMap)), v_tc);
+	if (mtl.normalMap > 0)
+		normalSample = texture( sampler2D(unpackUint2x32(mtl.normalMap)), v_tc).xyz;
 
-	runAlphaTest(albedo.a, mtl.alphaTest_);
+	runAlphaTest(albedo.a, mtl.alphaTest);
 
 	// world-space normal
 	vec3 n = normalize(v_worldNormal);
