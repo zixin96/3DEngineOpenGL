@@ -28,6 +28,7 @@ Copy `vendor/src/bistro/PatchedMaterials/interior.mtl` into `vendor/src/bistro/I
   - Direct-State-Access (DSA) programming model
   - `ARB_bindless_texture`, `ARB_multi_draw_indirect` (MDI), `ARB_indirect_parameters`
     - `glMultiDrawElementsIndirect`
+- `.obj` and `.gltf` loading
 - Programmable vertex pulling (PVP) data storage approach
 - HDR Cube map: 6 faces or equirectangular format or vertical/horizontal cross
 - Custom mesh preprocessing pipeline 
@@ -46,10 +47,24 @@ Copy `vendor/src/bistro/PatchedMaterials/interior.mtl` into `vendor/src/bistro/I
 
 | Name                                                         | Screenshot                                                   | Description                                                  |
 | ------------------------------------------------------------ | ------------------------------------------------------------ | ------------------------------------------------------------ |
-| 01HelloWorld                                                 |                                                              | "Hello World"                                                |
+| 01HelloWorld                                                 | "Hello World"                                                | "Hello World"                                                |
 | 02HelloTriangle                                              |                                                              |                                                              |
 | SSAO                                                         | <img src="images/largescene.gif" alt="largescene" width="300" /> |                                                              |
 | [Shadow Mapping](https://github.com/zixin96/d3d12book/blob/master/Chapter%2020%20Shadow%20Mapping/Shadows) | ![](https://github.com/zixin96/d3d12book/blob/master/Chapter%2020%20Shadow%20Mapping/Shadows/images/demo.gif) | This demo shows a basic implementation of the shadow mapping algorithm. |
+
+## Dependencies
+
+- rapidjson
+- gli
+- glTF-Sample-Models
+- argh
+- meshoptimzer
+- assimp
+- imgui
+- stb
+- glm
+- glfw
+- glad
 
 ## Credits
 
