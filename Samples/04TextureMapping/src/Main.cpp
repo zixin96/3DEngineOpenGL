@@ -3,6 +3,8 @@
 #include <glad/gl.h>
 #include <glm/glm.hpp>
 #include <glm/ext.hpp>
+
+#include "OpenGL/GLApp.h"
 using glm::mat4;
 using glm::vec3;
 using glm::vec4;
@@ -13,75 +15,6 @@ using std::endl;
 
 #include <stb/stb_image.h>
 #include <stb/stb_image_write.h>
-
-void APIENTRY glDebugOutput(GLenum       source,
-                            GLenum       type,
-                            unsigned int id,
-                            GLenum       severity,
-                            GLsizei      length,
-                            const char*  message,
-                            const void*  userParam)
-{
-	// ignore non-significant error/warning codes
-	if (id == 131169 || id == 131185 || id == 131218 || id == 131204) return;
-
-	cout << "---------------" << endl;
-	cout << "Debug message (" << id << "): " << message << endl;
-
-	switch (source)
-	{
-		case GL_DEBUG_SOURCE_API: cout << "Source: API";
-			break;
-		case GL_DEBUG_SOURCE_WINDOW_SYSTEM: cout << "Source: Window System";
-			break;
-		case GL_DEBUG_SOURCE_SHADER_COMPILER: cout << "Source: Shader Compiler";
-			break;
-		case GL_DEBUG_SOURCE_THIRD_PARTY: cout << "Source: Third Party";
-			break;
-		case GL_DEBUG_SOURCE_APPLICATION: cout << "Source: Application";
-			break;
-		case GL_DEBUG_SOURCE_OTHER: cout << "Source: Other";
-			break;
-	}
-	cout << endl;
-
-	switch (type)
-	{
-		case GL_DEBUG_TYPE_ERROR: cout << "Type: Error";
-			break;
-		case GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR: cout << "Type: Deprecated Behaviour";
-			break;
-		case GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR: cout << "Type: Undefined Behaviour";
-			break;
-		case GL_DEBUG_TYPE_PORTABILITY: cout << "Type: Portability";
-			break;
-		case GL_DEBUG_TYPE_PERFORMANCE: cout << "Type: Performance";
-			break;
-		case GL_DEBUG_TYPE_MARKER: cout << "Type: Marker";
-			break;
-		case GL_DEBUG_TYPE_PUSH_GROUP: cout << "Type: Push Group";
-			break;
-		case GL_DEBUG_TYPE_POP_GROUP: cout << "Type: Pop Group";
-			break;
-		case GL_DEBUG_TYPE_OTHER: cout << "Type: Other";
-			break;
-	}
-	cout << endl;
-
-	switch (severity)
-	{
-		case GL_DEBUG_SEVERITY_HIGH: cout << "Severity: high";
-			break;
-		case GL_DEBUG_SEVERITY_MEDIUM: cout << "Severity: medium";
-			break;
-		case GL_DEBUG_SEVERITY_LOW: cout << "Severity: low";
-			break;
-		case GL_DEBUG_SEVERITY_NOTIFICATION: cout << "Severity: notification";
-			break;
-	}
-	cout << endl;
-	cout << endl;
-}
 
 struct PerFrameData
 {
@@ -227,33 +160,10 @@ static const char* shaderCodeFragment = R"(
 
 int main()
 {
-	// set the GLFW error callback via a simple lambda to catch potential errors
-	glfwSetErrorCallback([](int error, const char* description)
-	{
-		fprintf(stderr, "Error: %s\n", description);
-	});
-
-	// now we can initialize GLFW
-	if (!glfwInit())
-	{
-		exit(EXIT_FAILURE);
-	}
-
-	// tell GLFW which OpenGL version to use
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
-	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-	glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, true);
-
-	GLFWwindow* window = glfwCreateWindow(1000, 1000, "GLFW", nullptr, nullptr);
-	if (!window)
-	{
-		glfwTerminate();
-		exit(EXIT_FAILURE);
-	}
+	GLApp app;
 
 	// set a callback for key events
-	glfwSetKeyCallback(window, [](GLFWwindow* window, int key, int scancode, int action, int mods)
+	glfwSetKeyCallback(app.getWindow(), [](GLFWwindow* window, int key, int scancode, int action, int mods)
 	{
 		// press escape key will close the window
 		if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
@@ -273,22 +183,6 @@ int main()
 		}
 	});
 
-	// prepare OpenGL context
-	glfwMakeContextCurrent(window);
-	gladLoadGL(glfwGetProcAddress);
-	glfwSwapInterval(1);
-
-	// OpenGL Debugging
-	int flags;
-	glGetIntegerv(GL_CONTEXT_FLAGS, &flags);
-	if (flags & GL_CONTEXT_FLAG_DEBUG_BIT)
-	{
-		// initialize debug output
-		glEnable(GL_DEBUG_OUTPUT);
-		glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
-		glDebugMessageCallback(glDebugOutput, nullptr);
-		glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, GL_TRUE);
-	}
 
 	// OpenGL uniform buffer offset alignment query
 	GLint alignment;
@@ -343,10 +237,10 @@ int main()
 	glEnable(GL_POLYGON_OFFSET_LINE);
 	glPolygonOffset(-1.f, -1.f); // move the wireframe rendering slightly toward the camera
 
-	while (!glfwWindowShouldClose(window))
+	while (!glfwWindowShouldClose(app.getWindow()))
 	{
 		int width, height;
-		glfwGetFramebufferSize(window, &width, &height);
+		glfwGetFramebufferSize(app.getWindow(), &width, &height);
 		const float ratio = width / (float)height;
 		glViewport(0, 0, width, height);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -381,8 +275,7 @@ int main()
 		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 		glDrawArrays(GL_TRIANGLES, 0, 36);
 
-		glfwSwapBuffers(window);
-		glfwPollEvents();
+		app.swapBuffers();
 	}
 
 	// clean up the opengl objects
@@ -391,9 +284,6 @@ int main()
 	glDeleteShader(shaderVertex);
 	glDeleteShader(shaderFragment);
 	glDeleteVertexArrays(1, &VAO);
-
-	glfwDestroyWindow(window);
-	glfwTerminate();
 
 	return 0;
 }

@@ -4,10 +4,11 @@
 #include <glm/glm.hpp>
 #include <glm/ext.hpp>
 
+#include "OpenGL/GLApp.h"
 #include "OpenGL/GLBuffer.h"
 #include "OpenGL/GLProgram.h"
 #include "OpenGL/GLShader.h"
-#include "Util/Debug.h"
+
 using glm::mat4;
 using glm::vec3;
 
@@ -96,48 +97,7 @@ static const char* shaderCodeFragment = R"(
 
 int main()
 {
-	// set the GLFW error callback via a simple lambda to catch potential errors
-	glfwSetErrorCallback([](int error, const char* description)
-	{
-		fprintf(stderr, "Error: %s\n", description);
-	});
-
-	// now we can initialize GLFW
-	if (!glfwInit())
-	{
-		exit(EXIT_FAILURE);
-	}
-
-	// tell GLFW which OpenGL version to use
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
-	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-	glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, true);
-
-	GLFWwindow* window = glfwCreateWindow(1000, 1000, "GLFW", nullptr, nullptr);
-	if (!window)
-	{
-		glfwTerminate();
-		exit(EXIT_FAILURE);
-	}
-
-	// set a callback for key events
-	glfwSetKeyCallback(window, [](GLFWwindow* window, int key, int scancode, int action, int mods)
-	{
-		// press escape key will close the window
-		if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
-		{
-			glfwSetWindowShouldClose(window, GLFW_TRUE);
-		}
-	});
-
-	// prepare OpenGL context
-	glfwMakeContextCurrent(window);
-	gladLoadGL(glfwGetProcAddress);
-	glfwSwapInterval(1);
-
-	// OpenGL Debugging
-	initDebug();
+	GLApp app;
 
 	// create an empty VAO
 	GLuint VAO;
@@ -175,10 +135,10 @@ int main()
 	glEnable(GL_POLYGON_OFFSET_LINE);
 	glPolygonOffset(-1.f, -1.f); // move the wireframe rendering slightly toward the camera
 
-	while (!glfwWindowShouldClose(window))
+	while (!glfwWindowShouldClose(app.getWindow()))
 	{
 		int width, height;
-		glfwGetFramebufferSize(window, &width, &height);
+		glfwGetFramebufferSize(app.getWindow(), &width, &height);
 		const float ratio = width / (float)height;
 		glViewport(0, 0, width, height);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -224,15 +184,11 @@ int main()
 		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 		glDrawArrays(GL_TRIANGLES, 0, 36);
 
-		glfwSwapBuffers(window);
-		glfwPollEvents();
+		app.swapBuffers();
 	}
 
 	// clean up the opengl objects
 	glDeleteVertexArrays(1, &VAO);
-
-	glfwDestroyWindow(window);
-	glfwTerminate();
 
 	return 0;
 }

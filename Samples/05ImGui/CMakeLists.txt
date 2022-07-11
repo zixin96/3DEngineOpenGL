@@ -4,4 +4,4 @@ include(../../CommonMacros.txt)
 
 SETUP_APP(05ImGui "Samples")
 
-target_link_libraries(05ImGui glad glfw)
+target_link_libraries(05ImGui glad glfw Core)

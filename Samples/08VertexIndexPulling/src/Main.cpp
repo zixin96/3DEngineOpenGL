@@ -4,12 +4,11 @@
 #include <glm/glm.hpp>
 #include <glm/ext.hpp>
 
+#include "OpenGL/GLApp.h"
 #include "OpenGL/GLBuffer.h"
 #include "OpenGL/GLShader.h"
 #include "OpenGL/GLProgram.h"
 #include "OpenGL/GLTexture.h"
-
-#include "Util/Debug.h"
 
 using glm::mat4;
 using glm::vec3;
@@ -43,33 +42,10 @@ struct VertexData
 
 int main()
 {
-	// set the GLFW error callback via a simple lambda to catch potential errors
-	glfwSetErrorCallback([](int error, const char* description)
-	{
-		fprintf(stderr, "Error: %s\n", description);
-	});
-
-	// now we can initialize GLFW
-	if (!glfwInit())
-	{
-		exit(EXIT_FAILURE);
-	}
-
-	// tell GLFW which OpenGL version to use
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
-	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-	glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, true);
-
-	GLFWwindow* window = glfwCreateWindow(1000, 1000, "GLFW", nullptr, nullptr);
-	if (!window)
-	{
-		glfwTerminate();
-		exit(EXIT_FAILURE);
-	}
+	GLApp app;
 
 	// set a callback for key events
-	glfwSetKeyCallback(window, [](GLFWwindow* window, int key, int scancode, int action, int mods)
+	glfwSetKeyCallback(app.getWindow(), [](GLFWwindow* window, int key, int scancode, int action, int mods)
 	{
 		// press escape key will close the window
 		if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
@@ -89,14 +65,6 @@ int main()
 		}
 	});
 
-	// prepare OpenGL context
-	glfwMakeContextCurrent(window);
-	gladLoadGL(glfwGetProcAddress);
-	glfwSwapInterval(1);
-
-	// OpenGL Debugging
-	initDebug();
-
 	// we need a new vertex shader for doing index pulling
 	GLShader  shaderVertex("data/shaders/08VertexIndexPulling/08.vert");
 	GLShader  shaderGeometry("data/shaders/07VertexPulling/07.geom");
@@ -109,10 +77,10 @@ int main()
 	GLBuffer   perFrameDataBuffer(perFrameDataSize, nullptr, GL_DYNAMIC_STORAGE_BIT);
 	glBindBufferRange(GL_UNIFORM_BUFFER, 0, perFrameDataBuffer.getHandle(), 0, perFrameDataSize);
 
-	const aiScene* scene = aiImportFile("data/rubber_duck/scene.gltf", aiProcess_Triangulate);
+	const aiScene* scene = aiImportFile("data/free_zuk_3d_model/scene.gltf", aiProcess_Triangulate);
 	if (!scene || !scene->HasMeshes())
 	{
-		printf("Unable to load data/rubber_duck/scene.gltf\n");
+		printf("Unable to load data/free_zuk_3d_model/scene.gltf\n");
 		exit(255);
 	}
 
@@ -125,7 +93,7 @@ int main()
 		const aiVector3D tc  = mesh->mTextureCoords[0][i];
 		vertices.push_back({
 			                   .pos = vec3(pos.x, pos.z, pos.y),
-			                   .tc = vec2(tc.x, tc.y)
+			                   .tc = vec2(tc.x, 1.f - tc.y)
 		                   });
 	}
 
@@ -154,23 +122,23 @@ int main()
 	// to do index pulling, we make bind index buffer to a shader storage buffer as well
 	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, indexBuffer.getHandle());
 
-	GLTexture duckBaseColor(GL_TEXTURE_2D, "data/rubber_duck/textures/Duck_baseColor.png");
-	GLuint    duckBaseColorHandle = duckBaseColor.getHandle();
-	glBindTextures(0, 1, &duckBaseColorHandle);
+	GLTexture truckBaseColor(GL_TEXTURE_2D, "data/free_zuk_3d_model/textures/material_baseColor.jpeg");
+	GLuint    truckBaseColorHandle = truckBaseColor.getHandle();
+	glBindTextures(0, 1, &truckBaseColorHandle);
 
 	// depth test is required to render 3D objects
 	glEnable(GL_DEPTH_TEST);
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
-	while (!glfwWindowShouldClose(window))
+	while (!glfwWindowShouldClose(app.getWindow()))
 	{
 		int width, height;
-		glfwGetFramebufferSize(window, &width, &height);
+		glfwGetFramebufferSize(app.getWindow(), &width, &height);
 		const float ratio = width / (float)height;
 		glViewport(0, 0, width, height);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		const mat4 m = glm::rotate(glm::translate(mat4(1.0f), vec3(0.0f, -0.5f, -1.5f)), (float)glfwGetTime(), vec3(0.0f, 1.0f, 0.0f));
+		const mat4 m = glm::rotate(glm::translate(mat4(1.0f), vec3(0.0f, -0.2f, -1.5f)), (float)glfwGetTime() * 0.5f, vec3(0.0f, 1.0f, 0.0f));
 		const mat4 p = glm::perspective(45.0f, ratio, 0.1f, 1000.0f);
 
 		// render the solid cube with FILL mode
@@ -183,15 +151,11 @@ int main()
 		// Non-indexed draw is used when we do index pulling and gl_VertexID is used to manually index into the index buffer in the vertex shader
 		glDrawArrays(GL_TRIANGLES, 0, static_cast<unsigned>(indices.size()));
 
-		glfwSwapBuffers(window);
-		glfwPollEvents();
+		app.swapBuffers();
 	}
 
 	// clean up the opengl objects
 	glDeleteVertexArrays(1, &vao);
-
-	glfwDestroyWindow(window);
-	glfwTerminate();
 
 	return 0;
 }
