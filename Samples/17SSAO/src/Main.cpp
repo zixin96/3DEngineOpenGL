@@ -72,16 +72,16 @@ int main()
 	// full screen vertex shader will be shared with multiple shader programs
 	GLShader shdFullScreenQuadVert("data/shaders/fullScreenQuadOpt.vert");
 
-	GLShader  shdSSAOFrag("data/shaders/16SSAO/SSAO.frag");
+	GLShader  shdSSAOFrag("data/shaders/17SSAO/SSAO.frag");
 	GLProgram progSSAO(shdFullScreenQuadVert, shdSSAOFrag);
 
-	GLShader  shdCombineSSAOFrag("data/shaders/16SSAO/SSAO_combine.frag");
+	GLShader  shdCombineSSAOFrag("data/shaders/17SSAO/SSAO_combine.frag");
 	GLProgram progCombineSSAO(shdFullScreenQuadVert, shdCombineSSAOFrag);
 
-	GLShader  shdBlurXFrag("data/shaders/16SSAO/BlurX.frag");
+	GLShader  shdBlurXFrag("data/shaders/17SSAO/BlurX.frag");
 	GLProgram progBlurX(shdFullScreenQuadVert, shdBlurXFrag);
 
-	GLShader  shdBlurYFrag("data/shaders/16SSAO/BlurY.frag");
+	GLShader  shdBlurYFrag("data/shaders/17SSAO/BlurY.frag");
 	GLProgram progBlurY(shdFullScreenQuadVert, shdBlurYFrag);
 
 	const GLsizeiptr perFrameDataBufferSize = sizeof(PerFrameData);

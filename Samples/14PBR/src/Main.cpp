@@ -30,12 +30,12 @@ struct PerFrameData
 	vec4 cameraPos;
 };
 
-struct VertexData
-{
-	vec3 pos;
-	vec3 n;
-	vec2 tc;
-};
+// struct VertexData
+// {
+// 	vec3 pos;
+// 	vec3 n;
+// 	vec2 tc;
+// };
 
 struct MouseState
 {

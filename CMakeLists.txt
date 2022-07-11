@@ -110,6 +110,7 @@ add_subdirectory(Samples/14PBR)
 add_subdirectory(Samples/15LargeScene)
 add_subdirectory(Samples/16ShadowMapping)
 add_subdirectory(Samples/17SSAO)
+add_subdirectory(Samples/18HDR)
 
 add_subdirectory(Tools/MeshConversionTool)
 add_subdirectory(Tools/SceneConversionTool)

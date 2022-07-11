@@ -7,9 +7,12 @@
 #include "OpenGL/GLShader.h"
 #include "Util/Camera.h"
 #include "Util/VtxData.h"
+
 using glm::mat4;
 using glm::vec4;
 using glm::vec3;
+
+const GLuint kBufferIndex_PerFrameUniforms = 0;
 
 struct PerFrameData
 {
@@ -28,8 +31,6 @@ struct MouseState
 CameraPositionerFirstPerson gPositioner(vec3(-31.5f, 7.5f, -9.5f), vec3(0.0f, 0.0f, -1.0f), vec3(0.0f, 1.0f, 0.0f));
 Camera                      gCamera(gPositioner);
 
-const char* gMeshToLoad = "vendor/src/meshes/exterior.mesh";
-
 int main()
 {
 	GLApp app;
@@ -44,14 +45,25 @@ int main()
 	GLProgram program(shaderVertex, shaderGeometry, shaderFragment);
 
 	// read the converted mesh data from a given file and load it into a new GLMesh object
-	MeshData             meshData;
-	const MeshFileHeader header = loadMeshData(gMeshToLoad, meshData);
-	GLMesh               mesh(header, meshData.meshes.data(), meshData.indexData.data(), meshData.vertexData.data());
+	GLSceneData sceneData1("data/meshes/bistro_exterior.meshes",
+	                       "data/meshes/bistro_exterior.scene",
+	                       "data/meshes/bistro_exterior.materials");
+
+	GLSceneData sceneData2("data/meshes/bistro_interior.meshes",
+	                       "data/meshes/bistro_interior.scene",
+	                       "data/meshes/bistro_interior.materials");
+
+	GLMesh mesh1(sceneData1);
+	GLMesh mesh2(sceneData2);
 
 	// bind per-frame uniform buffer
 	const GLsizeiptr perFrameDataBufferSize = sizeof(PerFrameData);
 	GLBuffer         perFrameDataBuffer(perFrameDataBufferSize, nullptr, GL_DYNAMIC_STORAGE_BIT);
-	glBindBufferRange(GL_UNIFORM_BUFFER, 0, perFrameDataBuffer.getHandle(), 0, perFrameDataBufferSize);
+	glBindBufferRange(GL_UNIFORM_BUFFER,
+	                  kBufferIndex_PerFrameUniforms,
+	                  perFrameDataBuffer.getHandle(),
+	                  0,
+	                  perFrameDataBufferSize);
 
 	// set a callback for key events
 	glfwSetKeyCallback(app.getWindow(), [](GLFWwindow* window, int key, int scancode, int action, int mods)
@@ -120,16 +132,18 @@ int main()
 		};
 		glNamedBufferSubData(perFrameDataBuffer.getHandle(), 0, perFrameDataBufferSize, &perFrameData);
 
+		// 1. Bistro
+		glDisable(GL_BLEND);
+		glEnable(GL_DEPTH_TEST);
+		program.useProgram();
+		mesh1.draw(sceneData1);
+		mesh2.draw(sceneData2);
 
-		glDisable(GL_DEPTH_TEST);
+		// 2. Grid
 		glEnable(GL_BLEND);
 		progGrid.useProgram();
 		glDrawArraysInstancedBaseInstance(GL_TRIANGLES, 0, 6, 1, 0);
-
-		glEnable(GL_DEPTH_TEST);
-		glDisable(GL_BLEND);
-		program.useProgram();
-		mesh.draw(header);
+		glDisable(GL_DEPTH_TEST);
 
 		app.swapBuffers();
 	}

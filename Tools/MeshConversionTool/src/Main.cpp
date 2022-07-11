@@ -154,8 +154,8 @@ Mesh ConvertAssimpMesh(const aiMesh* m)
 	const Mesh result = {
 		.lodCount = 1,
 		.streamCount = 1,
-		.materialID = 0, // we are not yet exporting materials
-		.meshSize = meshSize,
+		// .materialID = 0, // we are not yet exporting materials
+		// .meshSize = meshSize,
 		.vertexCount = m->mNumVertices,
 		.lodOffset = {
 			gIndexOffset * sizeof(uint32_t),
