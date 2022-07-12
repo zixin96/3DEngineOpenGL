@@ -46,7 +46,7 @@ Copy `vendor/src/bistro/PatchedMaterials/interior.mtl` into `vendor/src/bistro/I
 ## Samples
 
 | Name                                                         | Screenshot                                                   | Description                                                  |
-| ------------------------------------------------------------ | ------------------------------------------------------------ | ------------------------------------------------------------ |
+| :----------------------------------------------------------- | :----------------------------------------------------------- | ------------------------------------------------------------ |
 | 01 HelloWorld                                                | "Hello World"                                                | "Hello World"                                                |
 | 02 HelloTriangle                                             | <img src="images/image-20220711184638896.png" alt="image-20220711184638896" width="500" /> | Hello Triangle                                               |
 | 03 Cube                                                      | <img src="images/cube.gif" alt="cube" width="500" />         | Let's draw a rotating 3D cube with wire frame contours.      |
@@ -59,9 +59,10 @@ Copy `vendor/src/bistro/PatchedMaterials/interior.mtl` into `vendor/src/bistro/I
 | 09 Cube Map                                                  | <img src="images/cubeMap.gif" alt="cubeMap" width="500" />   | This demo renders a reflective duck with a cube map texture and Schlick's approximation. |
 | 10 Mesh Optimizer                                            | <img src="images/meshOpt.gif" alt="meshOpt" width="500" />   | This demo renders two optimized duck meshes with different LOD levels. The meshes are optimized using [meshoptimizer](https://github.com/zeux/meshoptimizer). |
 | 11 Infinite Grid                                             | <img src="images/infinitegrid.gif" alt="infinitegrid" width="500" /> | This demo renders an infinite grid on the xz plane used for debugging purposes. |
-| 12 Large Scene                                               | <img src="images/largeSceneWireFrame.gif" alt="largeSceneWireFrame" width="500" /> |                                                              |
+| 12 Large Scene                                               | <img src="images/largeSceneWireFrame.gif" alt="largeSceneWireFrame" width="500" /> | This demo renders a large scene using a custom scene conversion tool (`Tools/SceneConversionTool`). |
+| 13                                                           | ![LOD](images/LOD.gif)                                       |                                                              |
 | SSAO                                                         | <img src="images/largescene.gif" alt="largescene" width="500" /> |                                                              |
-| [Shadow Mapping](https://github.com/zixin96/d3d12book/blob/master/Chapter%2020%20Shadow%20Mapping/Shadows) | ![](https://github.com/zixin96/d3d12book/blob/master/Chapter%2020%20Shadow%20Mapping/Shadows/images/demo.gif) | This demo shows a basic implementation of the shadow mapping algorithm. |
+| [Shadow Mapping](https://github.com/zixin96/d3d12book/blob/master/Chapter%2020%20Shadow%20Mapping/Shadows) |                                                              | This demo shows a basic implementation of the shadow mapping algorithm. |
 
 ## Dependencies
 

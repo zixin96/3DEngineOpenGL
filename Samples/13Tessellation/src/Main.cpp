@@ -8,7 +8,6 @@
 #include "Util/Camera.h"
 #include "Util/VtxData.h"
 
-
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
 #include <assimp/cimport.h>
@@ -163,6 +162,8 @@ int main()
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glEnable(GL_DEPTH_TEST);
+
+	gPositioner.mMaxSpeed = 5.0f;
 
 	GLImGui rendererUI;
 
