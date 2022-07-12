@@ -48,16 +48,19 @@ Copy `vendor/src/bistro/PatchedMaterials/interior.mtl` into `vendor/src/bistro/I
 | Name                                                         | Screenshot                                                   | Description                                                  |
 | ------------------------------------------------------------ | ------------------------------------------------------------ | ------------------------------------------------------------ |
 | 01 HelloWorld                                                | "Hello World"                                                | "Hello World"                                                |
-| 02 HelloTriangle                                             | <img src="images/image-20220711184638896.png" alt="image-20220711184638896" width="300" /> | Hello Triangle                                               |
-| 03 Cube                                                      | <img src="images/cube.gif" alt="cube" width="300" />         | Let's draw a rotating 3D cube with wire frame contours.      |
-| 03 Cube Optimized                                            | <img src="images/cube.gif" alt="cube" width="300" />         | This demo improves upon 02 Cube by uploading the entire per-frame data once and binding the correct instance before each draw call. In more complicated real-world use cases, this approach is more desirable. |
-| 04 Texture Mapping                                           | <img src="images/texMap.gif" alt="texMap" width="300" />     | This demo shows how to use the new **DSA** model to do **texture mapping**. |
-| 05 ImGui                                                     | <img src="images/image-20220711190226301.png" alt="image-20220711190226301" width="300" /> | A minimalistic implementation of **ImGui** rendering.        |
-| 06 Duck                                                      | <img src="images/duck.gif" alt="duck" width="300" />         | This demo shows the process of loading a **gltf 2.0** model using **Assimp**. |
-| 07 Vertex Pulling                                            | <img src="images/duckPVP.gif" alt="duckPVP" width="300" />   | This demo implements **programmable vertex pulling (PVP)**. We store vertices inside a shader storage buffer and read that data manually in the vertex shader. We also create a nice anti-aliased wireframe overlay on top of the colored mesh. |
-| 08 Vertex and Index Pulling                                  | <img src="images/truckPVP.gif" alt="truckPVP" width="300" /> | This demo implements **programmable vertex and index pulling**. We store vertices inside a shader storage buffer and indices inside another shader storage buffer. We read both data manually in the vertex shader. Compared with 07VertexPulling, this demo doesn't use index drawing (since we are pulling indices inside a storage buffer). Thus, instead of calling `glDrawElements`, we need to call `glDrawArrays` and specify the number of indices to draw. |
-|                                                              |                                                              |                                                              |
-| SSAO                                                         | <img src="images/largescene.gif" alt="largescene" width="300" /> |                                                              |
+| 02 HelloTriangle                                             | <img src="images/image-20220711184638896.png" alt="image-20220711184638896" width="500" /> | Hello Triangle                                               |
+| 03 Cube                                                      | <img src="images/cube.gif" alt="cube" width="500" />         | Let's draw a rotating 3D cube with wire frame contours.      |
+| 03 Cube Optimized                                            | <img src="images/cube.gif" alt="cube" width="500" />         | This demo improves upon 02 Cube by uploading the entire per-frame data once and binding the correct instance before each draw call. In more complicated real-world use cases, this approach is more desirable. |
+| 04 Texture Mapping                                           | <img src="images/texMap.gif" alt="texMap" width="500" />     | This demo shows how to use the new **DSA** model to do **texture mapping**. |
+| 05 ImGui                                                     | <img src="images/image-20220711190226301.png" alt="image-20220711190226301" width="500" /> | A minimalistic implementation of **ImGui** rendering.        |
+| 06 Duck                                                      | <img src="images/duck.gif" alt="duck" width="500" />         | This demo shows the process of loading a **gltf 2.0** model using **Assimp**. |
+| 07 Vertex Pulling                                            | <img src="images/duckPVP.gif" alt="duckPVP" width="500" />   | This demo implements **programmable vertex pulling (PVP)**. We store vertices inside a shader storage buffer and read that data manually in the vertex shader. We also create a nice anti-aliased wireframe overlay on top of the colored mesh. |
+| 08 Vertex and Index Pulling                                  | <img src="images/truckPVP.gif" alt="truckPVP" width="500" /> | This demo implements **programmable vertex and index pulling**. We store vertices inside a shader storage buffer and indices inside another shader storage buffer. We read both data manually in the vertex shader. Compared with 07VertexPulling, this demo doesn't use index drawing (since we are pulling indices inside a storage buffer). Thus, instead of calling `glDrawElements`, we need to call `glDrawArrays` and specify the number of indices to draw. |
+| 09 Cube Map                                                  | <img src="images/cubeMap.gif" alt="cubeMap" width="500" />   | This demo renders a reflective duck with a cube map texture and Schlick's approximation. |
+| 10 Mesh Optimizer                                            | <img src="images/meshOpt.gif" alt="meshOpt" width="500" />   | This demo renders two optimized duck meshes with different LOD levels. The meshes are optimized using [meshoptimizer](https://github.com/zeux/meshoptimizer). |
+| 11 Infinite Grid                                             | <img src="images/infinitegrid.gif" alt="infinitegrid" width="500" /> | This demo renders an infinite grid on the xz plane used for debugging purposes. |
+| 12 Large Scene                                               | <img src="images/largeSceneWireFrame.gif" alt="largeSceneWireFrame" width="500" /> |                                                              |
+| SSAO                                                         | <img src="images/largescene.gif" alt="largescene" width="500" /> |                                                              |
 | [Shadow Mapping](https://github.com/zixin96/d3d12book/blob/master/Chapter%2020%20Shadow%20Mapping/Shadows) | ![](https://github.com/zixin96/d3d12book/blob/master/Chapter%2020%20Shadow%20Mapping/Shadows/images/demo.gif) | This demo shows a basic implementation of the shadow mapping algorithm. |
 
 ## Dependencies
@@ -121,13 +124,13 @@ Nothing shows up on the screen. What happened??? In this case, we forgot to bind
 
 RenderDoc: 
 
-<img src="images/image-20220707185714051.png" alt="image-20220707185714051" width="300" />
+<img src="images/image-20220707185714051.png" alt="image-20220707185714051" width="500" />
 
 ---
 
 Bug: 
 
-<img src="images/image-20220707211538159.png" alt="image-20220707211538159" width="300" />
+<img src="images/image-20220707211538159.png" alt="image-20220707211538159" width="500" />
 
 Fix: 
 
@@ -161,7 +164,7 @@ for (size_t i = 0; i != m->mNumFaces; i++)
 
 WAT THE DUCK??: 
 
-<img src="images/image-20220708142617537.png" alt="image-20220708142617537" width="300" />
+<img src="images/image-20220708142617537.png" alt="image-20220708142617537" width="500" />
 
 ```glsl
 struct VertexData
@@ -173,7 +176,7 @@ struct VertexData
 
 Fix:
 
-<img src="images/image-20220708142754600.png" alt="image-20220708142754600" width="300" />
+<img src="images/image-20220708142754600.png" alt="image-20220708142754600" width="500" />
 
 ---
 

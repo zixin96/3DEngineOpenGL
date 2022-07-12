@@ -4,12 +4,12 @@
 #include <glm/glm.hpp>
 #include <glm/ext.hpp>
 
+#include "OpenGL/GLApp.h"
 #include "OpenGL/GLBuffer.h"
 #include "OpenGL/GLShader.h"
 #include "OpenGL/GLProgram.h"
 #include "OpenGL/GLTexture.h"
 #include "Util/Camera.h"
-#include "Util/Debug.h"
 
 using glm::mat4;
 using glm::vec3;
@@ -55,33 +55,10 @@ Camera                      gCamera(gPositioner);
 
 int main()
 {
-	// set the GLFW error callback via a simple lambda to catch potential errors
-	glfwSetErrorCallback([](int error, const char* description)
-	{
-		fprintf(stderr, "Error: %s\n", description);
-	});
-
-	// now we can initialize GLFW
-	if (!glfwInit())
-	{
-		exit(EXIT_FAILURE);
-	}
-
-	// tell GLFW which OpenGL version to use
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
-	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-	glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, true);
-
-	GLFWwindow* window = glfwCreateWindow(1000, 1000, "GLFW", nullptr, nullptr);
-	if (!window)
-	{
-		glfwTerminate();
-		exit(EXIT_FAILURE);
-	}
+	GLApp app;
 
 	// set a callback for key events
-	glfwSetKeyCallback(window, [](GLFWwindow* window, int key, int scancode, int action, int mods)
+	glfwSetKeyCallback(app.getWindow(), [](GLFWwindow* window, int key, int scancode, int action, int mods)
 	{
 		const bool pressed = action != GLFW_RELEASE;
 		if (key == GLFW_KEY_ESCAPE && pressed)
@@ -115,7 +92,7 @@ int main()
 		}
 	});
 
-	glfwSetCursorPosCallback(window, [](auto* window, double x, double y)
+	glfwSetCursorPosCallback(app.getWindow(), [](auto* window, double x, double y)
 	{
 		int width, height;
 		glfwGetFramebufferSize(window, &width, &height);
@@ -123,19 +100,11 @@ int main()
 		gMouseState.pos.y = static_cast<float>(y / height);
 	});
 
-	glfwSetMouseButtonCallback(window, [](auto* window, int button, int action, int mods)
+	glfwSetMouseButtonCallback(app.getWindow(), [](auto* window, int button, int action, int mods)
 	{
 		if (button == GLFW_MOUSE_BUTTON_LEFT)
 			gMouseState.pressedLeft = action == GLFW_PRESS;
 	});
-
-	// prepare OpenGL context
-	glfwMakeContextCurrent(window);
-	gladLoadGL(glfwGetProcAddress);
-	glfwSwapInterval(1);
-
-	// OpenGL Debugging
-	initDebug();
 
 	GLShader  shdModelVertex("data/shaders/09CubeMap/08Duck.vert");
 	GLShader  shdModelFragment("data/shaders/09CubeMap/08Duck.frag");
@@ -219,7 +188,7 @@ int main()
 	double timeStamp    = glfwGetTime();
 	float  deltaSeconds = 0.0f;
 
-	while (!glfwWindowShouldClose(window))
+	while (!glfwWindowShouldClose(app.getWindow()))
 	{
 		gPositioner.update(deltaSeconds, gMouseState.pos, gMouseState.pressedLeft);
 
@@ -228,7 +197,7 @@ int main()
 		timeStamp                 = newTimeStamp;
 
 		int width, height;
-		glfwGetFramebufferSize(window, &width, &height);
+		glfwGetFramebufferSize(app.getWindow(), &width, &height);
 		const float ratio = width / (float)height;
 		glViewport(0, 0, width, height);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -259,15 +228,11 @@ int main()
 		// baseInstance = 1 => gl_BaseInstance = 1 => use gl_BaseInstance to fetch the right model matrix
 		glDrawArraysInstancedBaseInstance(GL_TRIANGLES, 0, 36, 1, 1);
 
-		glfwSwapBuffers(window);
-		glfwPollEvents();
+		app.swapBuffers();
 	}
 
 	// clean up the opengl objects
 	glDeleteVertexArrays(1, &vao);
-
-	glfwDestroyWindow(window);
-	glfwTerminate();
 
 	return 0;
 }

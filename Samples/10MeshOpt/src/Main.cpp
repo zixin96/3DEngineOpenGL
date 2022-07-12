@@ -13,6 +13,7 @@
 
 #include <vector>
 
+#include "OpenGL/GLApp.h"
 #include "OpenGL/GLBuffer.h"
 #include "OpenGL/GLProgram.h"
 #include "OpenGL/GLShader.h"
@@ -87,39 +88,16 @@ struct PerFrameData
 
 int main(void)
 {
-	glfwSetErrorCallback(
-	                     [](int error, const char* description)
-	                     {
-		                     fprintf(stderr, "Error: %s\n", description);
-	                     }
-	                    );
-
-	if (!glfwInit())
-		exit(EXIT_FAILURE);
-
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
-	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-
-	GLFWwindow* window = glfwCreateWindow(1024, 768, "Simple example", nullptr, nullptr);
-	if (!window)
-	{
-		glfwTerminate();
-		exit(EXIT_FAILURE);
-	}
+	GLApp app;
 
 	glfwSetKeyCallback(
-	                   window,
+	                   app.getWindow(),
 	                   [](GLFWwindow* window, int key, int scancode, int action, int mods)
 	                   {
 		                   if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
 			                   glfwSetWindowShouldClose(window, GLFW_TRUE);
 	                   }
 	                  );
-
-	glfwMakeContextCurrent(window);
-	gladLoadGL(glfwGetProcAddress);
-	glfwSwapInterval(1);
 
 	GLShader  shaderVertex(GL_VERTEX_SHADER, shaderCodeVertex, nullptr);
 	GLShader  shaderGeometry(GL_GEOMETRY_SHADER, shaderCodeGeometry, nullptr);
@@ -208,7 +186,7 @@ int main(void)
 		                            sizeof(vec3));
 
 		// generate a LOD mesh
-		const float  threshold          = 0.1f;
+		const float  threshold          = 0.01f;
 		const size_t target_index_count = size_t(remappedIndices.size() * threshold);
 		const float  target_error       = 1e-2f;
 
@@ -246,10 +224,10 @@ int main(void)
 	glVertexArrayAttribFormat(vao, 0, 3, GL_FLOAT, GL_FALSE, 0);
 	glVertexArrayAttribBinding(vao, 0, 0);
 
-	while (!glfwWindowShouldClose(window))
+	while (!glfwWindowShouldClose(app.getWindow()))
 	{
 		int width, height;
-		glfwGetFramebufferSize(window, &width, &height);
+		glfwGetFramebufferSize(app.getWindow(), &width, &height);
 		const float ratio = width / (float)height;
 
 		glViewport(0, 0, width, height);
@@ -267,14 +245,10 @@ int main(void)
 		glNamedBufferSubData(perFrameDataBuffer.getHandle(), 0, kBufferSize, &perFrameData2);
 		glDrawElements(GL_TRIANGLES, static_cast<unsigned>(indicesLod.size()), GL_UNSIGNED_INT, (void*)sizeIndices);
 
-		glfwSwapBuffers(window);
-		glfwPollEvents();
+		app.swapBuffers();
 	}
 
 	glDeleteVertexArrays(1, &vao);
-
-	glfwDestroyWindow(window);
-	glfwTerminate();
 
 	return 0;
 }

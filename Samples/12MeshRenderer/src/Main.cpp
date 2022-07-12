@@ -109,6 +109,8 @@ int main()
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glEnable(GL_DEPTH_TEST);
 
+	gPositioner.mMaxSpeed = 10.f;
+
 	while (!glfwWindowShouldClose(app.getWindow()))
 	{
 		gPositioner.update(app.getDeltaSeconds(), gMouseState.pos, gMouseState.pressedLeft);
