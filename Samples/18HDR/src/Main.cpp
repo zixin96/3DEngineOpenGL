@@ -17,7 +17,6 @@ using glm::vec4;
 using glm::vec3;
 
 const GLuint kBufferIndex_PerFrameUniforms = 0;
-// kBufferIndex_Vertices is set to 0 in GLMeshPVP.cpp
 const GLuint kBufferIndex_ModelMatrices = 1;
 
 struct PerFrameData

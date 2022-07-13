@@ -1,5 +1,7 @@
 #version 460 core
 
+// This vertex shader is used to generate and transform grid vertices
+
 #include <data/shaders/11DebugGrid/GridParameters.glsl>
 #include <data/shaders/11DebugGrid/GLBufferDecl.glsl>
 

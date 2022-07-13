@@ -18,13 +18,17 @@ float max2(vec2 v)
 	return max(v.x, v.y);
 }
 
+// https://ourmachinery.com/post/borderland-between-rendering-and-editor-part-1/
 vec4 gridColor(vec2 uv)
 {
+	// compute the screen space length of the derivatives of the uv coordinates
+	// "how much we move in grid space from one pixel to the next"
 	vec2 dudv = vec2(
 		length(vec2(dFdx(uv.x), dFdy(uv.x))),
 		length(vec2(dFdx(uv.y), dFdy(uv.y)))
 	);
 
+	// compute the current LOD of our grid based on the derivatives
 	float lodLevel = max(0.0, log10((length(dudv) * gridMinPixelsBetweenCells) / gridCellSize) + 1.0);
 	float lodFade = fract(lodLevel);
 

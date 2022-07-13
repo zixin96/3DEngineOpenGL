@@ -28,7 +28,7 @@ float gLightNear       = 1.0f;
 float gLightFar        = 20.0f;
 float gLightDist       = 12.0f;
 
-// the rotation angles around the X and Y axis
+// the rotation angles around the local X and Y axis
 float gLightXAngle = -1.0f;
 float gLightYAngle = -2.0f;
 
