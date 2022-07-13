@@ -1,4 +1,4 @@
-# 11 DebugGrid
+# 11 DebugGrid*
 
 This demo implements an infinite grid that can be used for debugging purposes and in any editors. 
 
